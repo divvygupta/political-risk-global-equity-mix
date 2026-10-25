@@ -1,0 +1,135 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx,booktabs,caption,hyperref,amsmath}
+\usepackage[authoryear,round]{natbib}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{4pt}
+\graphicspath{{../results/}}
+
+\title{\textbf{Political Risk and the Global Equity Mix}\\[4pt]
+\large Evidence from Ten Equity Markets, 2008--2026}
+\author{Divvy Gupta\\ \small\href{https://github.com/divvygupta}{github.com/divvygupta}}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent This paper asks how a multi-asset fund should account for political risk across its country equity exposures. I build a monthly Political Risk Index (PRI) for ten markets from the Economic Policy Uncertainty and Geopolitical Risk indices and estimate its effects with panel local projections, a fixed-effects panel VAR, and a market-model event study of 30 political events. The results point to political risk as a volatility risk rather than a return risk. A one-standard-deviation political-risk surprise raises a country's realised volatility by about 2\% relative to other markets in the same month ($p = 0.003$), while its effect on excess returns is small ($-0.26$ pp) and reverses within a quarter. Event type matters. Unscheduled governance shocks, such as finance-minister dismissals and leadership scandals, cost $-4.8\%$ over three days on average ($p = 0.02$), while scheduled elections have no significant effect. A rule that underweights markets with rising political risk adds little (information ratio 0.16). Political risk is best treated as an input to the risk budget, not to return forecasts.
+\end{abstract}
+
+\section{Motivation}
+For a total-fund portfolio, political risk shows up in two places: in the long-run case for holding a country's assets, and in the shorter-run decisions about how much risk to take, where, and how to hedge it. My earlier study of political risk used annual governance indicators and found no significant effect of political risk on volatility or investment flows. That null result could reflect the data rather than the economics: annual governance scores move slowly, the panel was small (188 observations), and the event study did not remove global market moves. This version addresses all three issues by using monthly news-based risk measures, a panel of more than 2,000 country-months, and benchmark-adjusted abnormal returns. It also adds direct portfolio applications.
+
+\section{Data}
+\textbf{Political risk.} The Economic Policy Uncertainty index \citep{bbd2016} measures newspaper coverage of policy-related economic uncertainty. The country Geopolitical Risk index \citep{ci2022} measures coverage of geopolitical tensions involving each country. The two capture different risks: their within-country correlation ranges from $-0.06$ (Japan) to $0.52$ (Germany). South Africa has no EPU series, so its index uses GPR alone.
+
+\textbf{Markets.} Daily total returns, in U.S. dollars, of the iShares country ETFs for the United States, Germany, Japan, the United Kingdom, France, Canada, Australia, India, Brazil and South Africa, plus the MSCI ACWI ETF as the global benchmark. The sample runs from May 2008 (after ACWI's launch) to July 2026. India starts in 2012 with INDA. Dollar returns put markets on a common basis and reflect what an unhedged foreign investor earns.
+
+\section{Method}
+\textbf{Index.} Log EPU and log GPR are standardised within each country and combined with first-principal-component weights. With two standardised inputs, this is an equal-weighted average. A real-time version uses expanding-window standardisation, so each month's value uses only data available then; it is used in all portfolio tests. The political-risk \emph{shock} is the standardised innovation from a country-level AR(1) of the index: the part of this month's political risk not predictable from last month's.
+
+\textbf{Local projections.} Following \citet{jorda2005}, for each horizon $h = 0,\dots,12$:
+\begin{equation}
+y_{i,t+h} = \beta_h\, \text{shock}_{i,t} + \sum_{k=1}^{2}\left(\gamma_{h,k}\, y_{i,t-k} + \delta_{h,k}\, \text{shock}_{i,t-k}\right) + \alpha_i + \tau_t + \varepsilon_{i,t+h},
+\end{equation}
+where $y$ is either the cumulative excess return over ACWI from $t$ to $t+h$ or log realised volatility at $t+h$. Country effects $\alpha_i$ absorb persistent differences between markets. Month effects $\tau_t$ absorb global shocks, so $\beta_h$ measures the effect of a country's own political-risk surprise relative to other markets in the same month. Standard errors are Driscoll--Kraay, robust to cross-country and serial correlation.
+
+\textbf{Panel VAR.} A fixed-effects VAR in [shock, excess return, log volatility], with lags built within each country so that no observation is lagged across a country boundary. The lag length (2) is chosen by BIC. Impulse responses use a Cholesky ordering with political risk first, and 90\% bands come from 500 country-cluster bootstrap draws. Because it has no month effects, the VAR captures the \emph{total} response, including moves shared across markets.
+
+\textbf{Event study.} For 30 events (three per country), normal returns come from a market model of the country ETF on ACWI, estimated over trading days $[-250,-30]$. Each event is dated to the first U.S. trading day on which the news could be priced. Cumulative abnormal returns (CARs) are tested per event and across events with the standardised cross-sectional test of \citet{bmp1991}.
+
+\section{Results}
+\subsection{Political risk moves volatility, not returns}
+Figure~\ref{fig:lp} shows the local projections. A one-standard-deviation shock raises realised volatility by 2.0\% in the same month ($p = 0.003$) and 1.3\% the next ($p = 0.10$), after which the effect is indistinguishable from zero. The excess return falls by 0.26 pp on impact ($p = 0.05$) and the cumulative effect turns slightly positive by the third month ($+0.21$ pp, $p = 0.43$). Markets reprice political risk quickly; they do not drift lower afterwards.
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig2_local_projections.png}
+\caption{Panel local projections: response to a one-standard-deviation political-risk shock, with 90\% confidence bands.}
+\label{fig:lp}
+\end{figure}
+
+The panel VAR (Figure~\ref{fig:var}) gives a larger volatility response, about 5.7\% on impact. This is expected, since the VAR does not net out month effects and so includes the part of political risk that moves many markets together, such as the 2022 invasion of Ukraine. The response decays below 1\% within four months but stays statistically above zero for most of the year. The VAR's return response is small and insignificant at every horizon.
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig3_panel_var_irf.png}
+\caption{Fixed-effects panel VAR(2): impulse responses to a political-risk shock, with 90\% country-bootstrap bands.}
+\label{fig:var}
+\end{figure}
+
+\subsection{Event type matters more than the event}
+Across all 30 events, the mean three-day CAR is $-1.4\%$ (BMP $p = 0.16$). Grouping by event type shows a clear split (Table~\ref{tab:events}). Governance shocks average $-4.8\%$ over three days ($p = 0.02$), led by Brazil's 2017 Temer recording scandal ($-14.0\%$) and South Africa's dismissal of finance minister Nene in 2015 ($-11.7\%$). Policy shocks (the 2011 U.S. downgrade, India's demonetisation and the UK mini-budget) average $-3.1\%$ ($p = 0.05$, three events). Scheduled elections average $+0.8\%$ and are not significant. The Brexit vote ($-7.9\%$) is the main exception, and it was the outcome markets had priced as unlikely.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Event type & $n$ & CAR $[-1,+1]$ & BMP $p$ & CAR $[0,+5]$ & BMP $p$ \\
+\midrule
+Governance    & 8  & $-4.8\%$ & 0.02 & $-3.7\%$ & 0.10 \\
+Policy shock  & 3  & $-3.1\%$ & 0.05 & $-3.2\%$ & 0.22 \\
+Geopolitical  & 2  & $-1.4\%$ & 0.33 & $-4.2\%$ & 0.58 \\
+Unrest        & 3  & $-1.1\%$ & 0.57 & $-0.1\%$ & 0.82 \\
+Election      & 14 & $+0.8\%$ & 0.46 & $+0.8\%$ & 0.35 \\
+\midrule
+All events    & 30 & $-1.4\%$ & 0.16 & $-1.2\%$ & 0.24 \\
+\bottomrule
+\end{tabular}
+\caption{Mean cumulative abnormal returns by event type, market model on ACWI, Boehmer--Musumeci--Poulsen test.}
+\label{tab:events}
+\end{table}
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig4_event_study.png}
+\caption{Event study. Left: CAR over $[0,+5]$ for each event (red: $p < 0.05$). Right: cumulative abnormal returns from $-10$ to $+10$ trading days.}
+\end{figure}
+
+\subsection{Portfolio applications}
+\textbf{Regimes.} Ranking markets each month by real-time PRI, the top third returned 0.5\% a year more than the bottom third over the next month ($p = 0.83$), with similar realised volatility (21.9\% vs.\ 22.8\%). The \emph{level} of political risk relative to peers carries no information about next month's outcomes; the \emph{surprise} does, through volatility.
+
+\textbf{Tilt backtest.} Starting from an equal-weight country portfolio, I halve the weight of the three markets with the largest three-month rise in real-time PRI and redistribute the rest, using only information available at the start of each month (Table~\ref{tab:bt}). The tilt improves return/volatility slightly, from 0.28 to 0.30, and the maximum drawdown from $-48.2\%$ to $-46.0\%$. With an information ratio of 0.16 and 12.6\% monthly turnover, however, the gain would not survive realistic trading costs.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+ & Return & Volatility & Return/vol & Max DD & Tracking error & Info.\ ratio \\
+\midrule
+Equal weight         & 5.4\% & 19.3\% & 0.28 & $-48.2\%$ & -- & -- \\
+Political-risk tilt  & 5.7\% & 19.2\% & 0.30 & $-46.0\%$ & 1.3\% & 0.16 \\
+\bottomrule
+\end{tabular}
+\caption{Backtest, May 2008 -- July 2026, annualised, USD, before costs.}
+\label{tab:bt}
+\end{table}
+
+\textbf{Stress tests.} Figure~\ref{fig:stress} shows market returns in five political-stress windows. The losses concentrate where the shock originated or where the exposure was largest: the UK ($-13.2\%$) and continental Europe around Brexit; Germany ($-15.6\%$) and France ($-13.7\%$) during the first two weeks of the war in Ukraine, while Canada was flat; Brazil ($-10.2\%$) and South Africa ($-8.1\%$) after the 2016 U.S. election, as the dollar strengthened. An equal-weight portfolio lost between 0.5\% and 6.4\% in each episode. Since returns are in U.S. dollars, much of the emerging-market loss is currency.
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig7_stress_tests.png}
+\caption{Cumulative USD returns during political-stress windows.}
+\label{fig:stress}
+\end{figure}
+
+\section{Implications for a total-fund portfolio}
+\begin{enumerate}
+\item \textbf{Use political risk for sizing, not forecasting.} The robust effect is a short-lived rise in volatility. That is relevant to position sizing, risk limits and the timing of option hedges, but not to return forecasts.
+\item \textbf{Watch governance instability more than elections.} Markets price scheduled elections in advance. The large losses come from unscheduled shocks to who governs or who runs economic policy, which an election calendar would miss.
+\item \textbf{Treat currency as part of the exposure.} For a Canadian-dollar investor, the hedging decision changes how much of a political shock reaches the portfolio, especially in emerging markets.
+\end{enumerate}
+
+\section{Limitations}
+Ten markets and 18 years limit statistical power, and some event types have only two or three events. The panel VAR relies on its ordering assumption, which the local projections avoid. EPU and GPR are text-based measures and pick up media attention as well as underlying risk. The event list was chosen by the author and may favour well-known, and therefore larger, episodes. The backtest excludes transaction costs.
+
+\section*{Reproducibility}
+All code, data sources and tests are in the \href{https://github.com/divvygupta/political-risk-global-equity-mix}{project repository on GitHub}. Results in this paper are from the October 2026 run; a GitHub Actions workflow refreshes them monthly.
+
+\begin{thebibliography}{9}
+\bibitem[Baker et al.(2016)]{bbd2016} Baker, S.~R., Bloom, N., and Davis, S.~J. (2016). Measuring economic policy uncertainty. \emph{Quarterly Journal of Economics}, 131(4), 1593--1636.
+\bibitem[Boehmer et al.(1991)]{bmp1991} Boehmer, E., Musumeci, J., and Poulsen, A.~B. (1991). Event-study methodology under conditions of event-induced variance. \emph{Journal of Financial Economics}, 30(2), 253--272.
+\bibitem[Caldara and Iacoviello(2022)]{ci2022} Caldara, D., and Iacoviello, M. (2022). Measuring geopolitical risk. \emph{American Economic Review}, 112(4), 1194--1225.
+\bibitem[Driscoll and Kraay(1998)]{dk1998} Driscoll, J.~C., and Kraay, A.~C. (1998). Consistent covariance matrix estimation with spatially dependent panel data. \emph{Review of Economics and Statistics}, 80(4), 549--560.
+\bibitem[Jord\`a(2005)]{jorda2005} Jord\`a, \`O. (2005). Estimation and inference of impulse responses by local projections. \emph{American Economic Review}, 95(1), 161--182.
+\end{thebibliography}
+\end{document}
