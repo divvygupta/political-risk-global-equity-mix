@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from political_risk import allocation, config, data, econometrics, events, index, report
+from political_risk import allocation, config, data, econometrics, events, index, report, scenarios
 
 
 def main(argv=None):
@@ -23,8 +23,10 @@ def main(argv=None):
 
     if a.synthetic:
         prices, epu, gpr = data.synthetic_dataset()
+        fx = data.synthetic_fx(prices.index)
     else:
         prices, epu, gpr = data.load_prices(refresh=a.refresh), data.load_epu(), data.load_gpr()
+        fx = data.load_fx(refresh=a.refresh)
 
     pri, pca = index.build_pri(epu, gpr)
     pri = pri[pri.index.get_level_values("date") >= config.START]
@@ -40,14 +42,21 @@ def main(argv=None):
     regimes = allocation.regime_analysis(panel)
     metrics, rets, weights = allocation.backtest(panel)
     stress = allocation.stress_test(prices, config.STRESS_WINDOWS)
+    print("Scenarios ...")
+    shocks = scenarios.scenario_shocks(pri)
+    sc_vols, sc_port = scenarios.portfolio_risk(prices, fx, shocks, var)
+    sc_ana = scenarios.analogue_outcomes(prices, fx)
 
     figs = [report.plot_pri(pri, a.out), report.plot_lp(lp, a.out), report.plot_var(var, a.out),
             report.plot_events(per_event, paths, a.out), report.plot_regimes(regimes, a.out),
-            report.plot_backtest(rets, a.out), report.plot_stress(stress, a.out)]
+            report.plot_backtest(rets, a.out), report.plot_stress(stress, a.out),
+            report.plot_scenarios(sc_vols, sc_port, a.out), report.plot_fx_split(sc_ana, a.out)]
 
     tables = {"local_projections.csv": lp, "event_study_by_event.csv": per_event,
               "event_study_summary.csv": ev_summary, "regimes.csv": regimes,
-              "backtest_metrics.csv": metrics, "stress_tests.csv": stress}
+              "backtest_metrics.csv": metrics, "stress_tests.csv": stress,
+              "scenario_shocks.csv": shocks, "scenario_volatility.csv": sc_vols,
+              "scenario_portfolio.csv": sc_port, "scenario_analogues.csv": sc_ana}
     for name, t in tables.items():
         t.to_csv(os.path.join(a.out, name))
 
@@ -55,6 +64,7 @@ def main(argv=None):
     latest = pri["pri_rt"].unstack("country").ffill().iloc[-1]
     res = {"lp": lp, "var": var, "regimes": regimes, "metrics": metrics, "event_summary": ev_summary, "per_event": per_event,
            "stress": stress, "weights": weights, "pca": pca, "pri_latest": latest,
+           "scenarios": (sc_vols, sc_port, sc_ana, config.SCENARIOS),
            "n_countries": panel.index.get_level_values("country").nunique(),
            "start": dates.min().strftime("%b %Y"), "end": dates.max().strftime("%b %Y")}
     brief = report.briefing(res, a.out, synthetic=a.synthetic)

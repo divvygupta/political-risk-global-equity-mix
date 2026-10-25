@@ -141,6 +141,57 @@ def plot_stress(stress: pd.DataFrame, out: str) -> str:
     return _save(fig, out, "fig7_stress_tests.png")
 
 
+def plot_scenarios(vols: pd.DataFrame, port: pd.DataFrame, out: str) -> str:
+    """Projected volatility change by scenario and market, and the portfolio's value at risk."""
+    piv = vols.pivot(index="scenario", columns="country", values="vol change").reindex(port.index) * 100
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.2), gridspec_kw={"width_ratios": [1.9, 1]})
+    vmax = max(np.nanmax(piv.values), 1)
+    im = a1.imshow(piv.values, cmap="Reds", vmin=0, vmax=vmax, aspect="auto")
+    a1.set_xticks(range(piv.shape[1]), piv.columns)
+    a1.set_yticks(range(piv.shape[0]), piv.index)
+    for i in range(piv.shape[0]):
+        for j in range(piv.shape[1]):
+            v = piv.values[i, j]
+            a1.text(j, i, f"{v:.0f}", ha="center", va="center", fontsize=7,
+                    color="white" if v > vmax * 0.6 else INK)
+    a1.grid(False)
+    a1.set_title("Projected rise in market volatility, first month (%)")
+    y = np.arange(len(port))
+    a2.set_axisbelow(True)
+    a2.barh(y + 0.2, port["current 1-month VaR (95%)"] * 100, height=0.38, color=GREY, label="Current")
+    a2.barh(y - 0.2, port["scenario 1-month VaR (95%)"] * 100, height=0.38, color=RED, label="Scenario")
+    a2.set_yticks(y, [""] * len(y))
+    a2.invert_yaxis()
+    a2.set_title("Portfolio 1-month 95% VaR (% of value)")
+    a2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2, fontsize=7)
+    a2.grid(axis="y", visible=False)
+    fig.suptitle("Scenario analysis: equal-weight portfolio of 10 markets, Canadian-dollar investor, correlations held fixed",
+                 fontsize=9, color=MUTED, y=1.02)
+    return _save(fig, out, "fig8_scenarios.png")
+
+
+def plot_fx_split(analogues: pd.DataFrame, out: str, n: int = 4) -> str:
+    """For each scenario's analogue, the worst-hit markets' CAD returns split into local equity and currency."""
+    scen = list(dict.fromkeys(analogues["scenario"]))
+    fig, axes = plt.subplots(1, len(scen), figsize=(10, 3), sharey=True)
+    for ax, sc in zip(np.atleast_1d(axes), scen):
+        d = analogues[analogues.scenario == sc].nsmallest(n, "CAD-investor return")
+        eq, fxc = np.log1p(d["local equity"]) * 100, np.log1p(d["currency vs CAD"]) * 100
+        x = np.arange(len(d))
+        ax.bar(x, eq, color=BLUE, label="Local equity")
+        ax.bar(x, fxc, bottom=np.where((fxc < 0) == (eq < 0), eq, 0), color=GREY, label="Currency vs CAD")
+        ax.scatter(x, np.log1p(d["CAD-investor return"]) * 100, color=INK, s=12, zorder=3, label="Total (CAD)")
+        ax.axhline(0, color=INK, lw=0.7)
+        ax.set_axisbelow(True)
+        ax.set_xticks(x, d["country"])
+        ax.set_title(sc, fontsize=8)
+    np.atleast_1d(axes)[0].set_ylabel("Log return, %")
+    np.atleast_1d(axes)[0].legend(fontsize=6, loc="lower left")
+    fig.suptitle("What happened in each scenario's historical analogue: worst-hit markets, Canadian-dollar investor",
+                 fontsize=9, color=MUTED, y=1.03)
+    return _save(fig, out, "fig9_scenario_analogues.png")
+
+
 # --- Briefing -------------------------------------------------------------------------------
 def _fmt_pct(x, d=1):
     return "n/a" if pd.isna(x) else f"{x * 100:.{d}f}%"
@@ -218,6 +269,35 @@ def briefing(res: dict, out: str, synthetic: bool) -> str:
     lines += ["| Country | PRI (real time) | Tilt-model weight |", "|---|---|---|"]
     for c, v in latest.items():
         lines.append(f"| {c} | {v:+.2f} | {_fmt_pct(w.iloc[-1].get(c, np.nan))} |")
+    sc = res.get("scenarios")
+    if sc is not None:
+        vols, port, ana, sc_list = sc
+        lines += ["", "## Scenarios: what to do if...", "",
+                  "Each scenario takes its political-risk shocks from a comparable historical episode. The panel VAR "
+                  "turns them into projected volatility; the portfolio is an equal-weight mix of the 10 markets held "
+                  "by a Canadian-dollar investor, with correlations held fixed (which understates risk in a crisis).", ""]
+        for s_ in sc_list:
+            v = vols[vols.scenario == s_.name].sort_values("vol change", ascending=False)
+            p_ = port.loc[s_.name]
+            a = ana[ana.scenario == s_.name]
+            hit = v[v["shock (s.d.)"] >= 1].head(3)
+            hit_txt = ", ".join(f"{r.country} {r['vol change'] * 100:+.0f}%" for _, r in hit.iterrows()) or "no market above a 1 s.d. shock"
+            worst = a.nsmallest(1, "CAD-investor return")
+            w_txt = ""
+            if len(worst):
+                w = worst.iloc[0]
+                w_txt = (f" In the analogue ({w.start} to {w.end}), the worst-hit market for a Canadian investor was "
+                         f"{w.country} at {_fmt_pct(w['CAD-investor return'])}: {_fmt_pct(w['local equity'])} from local equity "
+                         f"and {_fmt_pct(w['currency vs CAD'])} from currency.")
+            if v["shock (s.d.)"].max() < 1:
+                lines += [f"**{s_.name}.** {s_.story} The monthly political-risk indices barely registered this episode "
+                          f"(largest shock {v['shock (s.d.)'].max():.1f} s.d.), so the model projects almost no change in "
+                          f"volatility.{w_txt} News-based indices miss domestic governance shocks like these, so they "
+                          f"need separate monitoring: the event study, not the index, is the guide here.", ""]
+                continue
+            lines += [f"**{s_.name}.** {s_.story} Largest projected volatility rises: {hit_txt}. Portfolio 1-month 95% VaR "
+                      f"rises from {_fmt_pct(p_['current 1-month VaR (95%)'])} to {_fmt_pct(p_['scenario 1-month VaR (95%)'])}; "
+                      f"holding risk constant means cutting exposure by {_fmt_pct(p_['exposure cut to hold VaR'])}.{w_txt}", ""]
     lines += ["", "## Stress tests (cumulative USD return)", "", (stress * 100).round(1).to_markdown(), "",
               "## Method notes and limitations", "",
               "- PRI uses within-country z-scores; `pri_rt` uses expanding windows so the backtest has no look-ahead.",
@@ -225,6 +305,8 @@ def briefing(res: dict, out: str, synthetic: bool) -> str:
               "cross-country and serial correlation.",
               "- Panel VAR is identified with political risk ordered first; results may depend on this ordering.",
               "- Ten markets and roughly two decades of data limit statistical power. Treat estimates as indicative.",
+              "- Scenario shocks are calibrated to historical analogues; projections assume each market's volatility "
+              "responds only to its own political risk and that correlations do not change.",
               "- Event dates are the first U.S. trading day on which the news could be priced, taken from public reporting.", ""]
     path = os.path.join(out, "briefing.md")
     with open(path, "w") as f:

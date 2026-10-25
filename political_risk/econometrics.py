@@ -121,7 +121,7 @@ def panel_var(panel, cols=("pri_shock", "xret", "log_rvol"), p=None, horizons=12
             continue
     draws = np.array(draws)
     lo, hi = np.percentile(draws, [5, 95], axis=0)
-    return {"p": p, "cols": cols, "irf": base, "lo": lo, "hi": hi, "n_obs": len(Y)}
+    return {"p": p, "cols": cols, "irf": base, "lo": lo, "hi": hi, "n_obs": len(Y), "sigma": sigma}
 
 
 # --- Panel local projections ------------------------------------------------------------------

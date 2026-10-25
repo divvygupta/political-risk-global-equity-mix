@@ -21,6 +21,12 @@ COUNTRIES = {
 }
 BENCHMARK = "ACWI"  # MSCI All Country World Index ETF
 
+# Exchange rates from Yahoo Finance, quoted as units of local currency per U.S. dollar.
+# Used to split U.S.-dollar returns into local equity and currency parts, and to
+# express returns for a Canadian-dollar investor.
+FX_TICKERS = {"DEU": "EUR=X", "FRA": "EUR=X", "JPN": "JPY=X", "GBR": "GBP=X", "CAN": "CAD=X",
+              "AUS": "AUD=X", "IND": "INR=X", "BRA": "BRL=X", "ZAF": "ZAR=X"}  # USA: USD
+
 START = "2008-04-01"  # ACWI ETF inception is March 2008
 END = None  # None = most recent available
 
@@ -86,3 +92,45 @@ STRESS_WINDOWS = {
     "Invasion of Ukraine (Feb-Mar 2022)": ("2022-02-23", "2022-03-08"),
     "U.S.-Canada tariff shock (Feb 2025)": ("2025-01-31", "2025-02-04"),
 }
+
+
+# --- Forward-looking scenarios ------------------------------------------------------
+# Each scenario takes its political-risk shocks from historical analogue months:
+# a country's shock is its largest political-risk surprise in those months. The
+# "window" is the daily period used to show what markets actually did then.
+@dataclass(frozen=True)
+class Scenario:
+    name: str
+    story: str
+    months: dict  # country code (or "*" for all) -> list of "YYYY-MM" analogue months
+    windows: dict  # country code (or "*") -> (start, end) daily window of the analogue
+
+
+SCENARIOS = [
+    Scenario(
+        "Tariff escalation",
+        "U.S. tariffs on Canada and other trading partners escalate, as in February to April 2025.",
+        {"*": ["2025-02", "2025-03", "2025-04"]},
+        {"*": ("2025-01-31", "2025-04-30")},
+    ),
+    Scenario(
+        "European security crisis",
+        "A major military escalation in Europe, as after Russia's full-scale invasion of Ukraine.",
+        {"*": ["2022-02", "2022-03"]},
+        {"*": ("2022-02-23", "2022-03-31")},
+    ),
+    Scenario(
+        "Emerging-market governance shock",
+        "Sudden leadership or finance-ministry upheaval in large emerging markets, as in Brazil (May 2017) "
+        "and South Africa (December 2015).",
+        {"BRA": ["2017-05"], "ZAF": ["2015-12"]},
+        {"BRA": ("2017-05-17", "2017-06-16"), "ZAF": ("2015-12-09", "2016-01-08")},
+    ),
+    Scenario(
+        "U.S. fiscal standoff",
+        "A U.S. debt-ceiling standoff that ends in a credit-rating downgrade, as in July to August 2011 "
+        "(a period that also saw the euro-area debt crisis intensify).",
+        {"*": ["2011-07", "2011-08"]},
+        {"*": ("2011-07-22", "2011-08-22")},
+    ),
+]

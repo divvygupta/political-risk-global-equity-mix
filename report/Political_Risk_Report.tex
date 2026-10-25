@@ -16,7 +16,7 @@
 \maketitle
 
 \begin{abstract}
-\noindent This paper asks how a multi-asset fund should account for political risk across its country equity exposures. I build a monthly Political Risk Index (PRI) for ten markets from the Economic Policy Uncertainty and Geopolitical Risk indices and estimate its effects with panel local projections, a fixed-effects panel VAR, and a market-model event study of 30 political events. The results point to political risk as a volatility risk rather than a return risk. A one-standard-deviation political-risk surprise raises a country's realised volatility by about 2\% relative to other markets in the same month ($p = 0.003$), while its effect on excess returns is small ($-0.26$ pp) and reverses within a quarter. Event type matters. Unscheduled governance shocks, such as finance-minister dismissals and leadership scandals, cost $-4.8\%$ over three days on average ($p = 0.02$), while scheduled elections have no significant effect. A rule that underweights markets with rising political risk adds little (information ratio 0.16). Political risk is best treated as an input to the risk budget, not to return forecasts.
+\noindent This paper asks how a multi-asset fund should account for political risk across its country equity exposures. I build a monthly Political Risk Index (PRI) for ten markets from the Economic Policy Uncertainty and Geopolitical Risk indices and estimate its effects with panel local projections, a fixed-effects panel VAR, and a market-model event study of 30 political events. The results point to political risk as a volatility risk rather than a return risk. A one-standard-deviation political-risk surprise raises a country's realised volatility by about 2\% relative to other markets in the same month ($p = 0.003$), while its effect on excess returns is small ($-0.26$ pp) and reverses within a quarter. Event type matters. Unscheduled governance shocks, such as finance-minister dismissals and leadership scandals, cost $-4.8\%$ over three days on average ($p = 0.02$), while scheduled elections have no significant effect. A rule that underweights markets with rising political risk adds little (information ratio 0.16). Four forward-looking scenarios, each calibrated to a historical episode, show that tariff escalation or a European security crisis would raise a Canadian-dollar portfolio's one-month value at risk by about 11--12\%. They also show that the U.S. dollar's role as a safe haven depends on the crisis, and that news-based indices miss domestic governance shocks. Political risk is best treated as an input to the risk budget, not to return forecasts.
 \end{abstract}
 
 \section{Motivation}
@@ -112,15 +112,54 @@ Political-risk tilt  & 5.7\% & 19.2\% & 0.30 & $-46.0\%$ & 1.3\% & 0.16 \\
 \label{fig:stress}
 \end{figure}
 
+\subsection{Scenarios: what to do if \ldots}
+The results above are backward-looking. To turn them into forward-looking guidance, I define four scenarios, each calibrated to a historical episode: tariff escalation (February to April 2025), a European security crisis (the 2022 invasion of Ukraine), a U.S. fiscal standoff (the 2011 debt-ceiling downgrade) and an emerging-market governance shock (Brazil in May 2017, South Africa in December 2015). In each scenario, a country's shock is its largest political-risk surprise in the analogue months, so the scenario reflects how risk actually spread across countries. The panel VAR turns each shock into projected volatility. Holding the last year's correlations fixed, this gives the change in one-month 95\% value at risk (VaR) for an equal-weight portfolio of the ten markets held by a Canadian-dollar investor (Figure~\ref{fig:scn}, Table~\ref{tab:scn}). Correlations usually rise in a crisis, so these figures are a lower bound.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrrl}
+\toprule
+Scenario & Current VaR & Scenario VaR & Exposure cut & Largest volatility rises \\
+\midrule
+Tariff escalation          & 7.8\% & 8.7\% & 10.5\% & CAN $+18\%$, JPN $+16\%$ \\
+European security crisis   & 7.8\% & 8.7\% & 10.3\% & USA $+18\%$, AUS, GBR $+16\%$ \\
+U.S. fiscal standoff       & 7.8\% & 8.3\% & 6.4\%  & ZAF $+10\%$, BRA $+9\%$ \\
+EM governance shock        & 7.8\% & 7.8\% & 0.2\%  & not captured by the index \\
+\bottomrule
+\end{tabular}
+\caption{Scenario results: one-month 95\% VaR of an equal-weight portfolio for a Canadian-dollar investor, and the cut in exposure needed to keep VaR at its current level.}
+\label{tab:scn}
+\end{table}
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig8_scenarios.png}
+\caption{Projected rise in each market's volatility in the first month of each scenario, and the portfolio's one-month 95\% VaR.}
+\label{fig:scn}
+\end{figure}
+
+The historical analogues show what the model cannot: how losses split between equity and currency for a Canadian investor (Figure~\ref{fig:fx}). Three findings stand out.
+\begin{itemize}
+\item \textbf{The U.S. dollar is not a reliable hedge.} In the 2011 standoff, a crisis that started in the U.S., the U.S. dollar still rose about 5\% against the Canadian dollar and cushioned losses. In the 2025 tariff episode it fell, so U.S. stocks lost a Canadian investor 11.7\%: 7.4\% from the market and 4.6\% from the currency.
+\item \textbf{Currency can be half the loss.} In the 2022 European crisis, German stocks lost a Canadian investor 7.4\%, about half of it from the euro. In Brazil in 2017, the real accounted for half of a 15.1\% loss.
+\item \textbf{The index has a blind spot.} The monthly indices barely registered the Brazilian and South African governance shocks (largest shock 0.2 standard deviations), even though markets fell 14\% and 12\% in three days. Domestic governance risk needs monitoring beyond news-based indices. The event study, not the index, is the guide here.
+\end{itemize}
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig9_scenario_analogues.png}
+\caption{Historical analogues: returns of the worst-hit markets for a Canadian-dollar investor, split into local equity and currency against the Canadian dollar.}
+\label{fig:fx}
+\end{figure}
+
 \section{Implications for a total-fund portfolio}
 \begin{enumerate}
 \item \textbf{Use political risk for sizing, not forecasting.} The robust effect is a short-lived rise in volatility. That is relevant to position sizing, risk limits and the timing of option hedges, but not to return forecasts.
 \item \textbf{Watch governance instability more than elections.} Markets price scheduled elections in advance. The large losses come from unscheduled shocks to who governs or who runs economic policy, which an election calendar would miss.
-\item \textbf{Treat currency as part of the exposure.} For a Canadian-dollar investor, the hedging decision changes how much of a political shock reaches the portfolio, especially in emerging markets.
+\item \textbf{Treat currency as part of the exposure.} For a Canadian-dollar investor, the currency can account for half the loss in a political shock, and the U.S. dollar is a safe haven in some crises but not in others. Hedging decisions should be scenario-specific.
+\item \textbf{Pre-agree the risk response.} Tariff escalation or a European security crisis would call for roughly a 10\% cut in exposure to keep value at risk unchanged. Agreeing these responses in advance lets a fund act quickly when a scenario starts to unfold.
 \end{enumerate}
 
 \section{Limitations}
-Ten markets and 18 years limit statistical power, and some event types have only two or three events. The panel VAR relies on its ordering assumption, which the local projections avoid. EPU and GPR are text-based measures and pick up media attention as well as underlying risk. The event list was chosen by the author and may favour well-known, and therefore larger, episodes. The backtest excludes transaction costs.
+Ten markets and 18 years limit statistical power, and some event types have only two or three events. The panel VAR relies on its ordering assumption, which the local projections avoid. EPU and GPR are text-based measures and pick up media attention as well as underlying risk. The event list was chosen by the author and may favour well-known, and therefore larger, episodes. The backtest excludes transaction costs. The scenarios assume each market responds only to its own political risk and that correlations stay fixed, so they understate risk in a crisis.
 
 \section*{Reproducibility}
 All code, data sources and tests are in the \href{https://github.com/divvygupta/political-risk-global-equity-mix}{project repository on GitHub}. Results in this paper are from the October 2026 run; a GitHub Actions workflow refreshes them monthly.

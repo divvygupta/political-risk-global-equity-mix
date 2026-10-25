@@ -33,6 +33,23 @@ def load_prices(start: str = config.START, end: str | None = config.END, refresh
     return prices
 
 
+def load_fx(start: str = config.START, end: str | None = config.END, refresh: bool = False) -> pd.DataFrame:
+    """Daily exchange rates, local currency per U.S. dollar; columns are country codes (USA = 1)."""
+    path = _cache_path("fx.csv")
+    if os.path.exists(path) and not refresh:
+        return pd.read_csv(path, index_col=0, parse_dates=True)
+
+    import yfinance as yf
+
+    tickers = sorted(set(config.FX_TICKERS.values()))
+    raw = yf.download(tickers, start=start, end=end, auto_adjust=False, progress=False)["Close"]
+    fx = pd.DataFrame({c: raw[t] for c, t in config.FX_TICKERS.items()})
+    fx["USA"] = 1.0
+    fx = fx[list(config.COUNTRIES)].dropna(how="all")
+    fx.to_csv(path)
+    return fx
+
+
 # --- Political-risk data ------------------------------------------------------------
 def _read_source(url: str, local_name: str, **kwargs) -> pd.DataFrame:
     """Read a source spreadsheet: a manually saved copy in data/raw first, then a CSV cache, then the URL."""
@@ -122,3 +139,11 @@ def synthetic_dataset(seed: int = 7, start: str = "2008-04-01", end: str = "2025
         prices[c] = 100 * np.exp(np.cumsum(r))
     prices = pd.DataFrame(prices, index=days)[codes + ["BENCH"]]
     return prices, epu, gpr
+
+
+def synthetic_fx(index: pd.DatetimeIndex, seed: int = 11) -> pd.DataFrame:
+    """Random-walk exchange rates (local per USD) for offline runs and tests."""
+    rng = np.random.default_rng(seed)
+    fx = {c: np.exp(np.cumsum(rng.normal(0, 0.005, len(index)))) for c in config.COUNTRIES}
+    fx["USA"] = np.ones(len(index))
+    return pd.DataFrame(fx, index=index)

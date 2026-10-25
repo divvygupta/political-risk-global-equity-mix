@@ -37,6 +37,19 @@ Coverage: 10 equity markets, May 2008 to Jul 2026, monthly, 2,124 country-month 
 | JPN | +0.45 | 12.1% |
 | ZAF | -2.23 | 5.0% |
 
+## Scenarios: what to do if...
+
+Each scenario takes its political-risk shocks from a comparable historical episode. The panel VAR turns them into projected volatility; the portfolio is an equal-weight mix of the 10 markets held by a Canadian-dollar investor, with correlations held fixed (which understates risk in a crisis).
+
+**Tariff escalation.** U.S. tariffs on Canada and other trading partners escalate, as in February to April 2025. Largest projected volatility rises: CAN +18%, JPN +16%, USA +14%. Portfolio 1-month 95% VaR rises from 7.8% to 8.7%; holding risk constant means cutting exposure by 10.5%. In the analogue (2025-01-31 to 2025-04-30), the worst-hit market for a Canadian investor was USA at -11.7%: -7.4% from local equity and -4.6% from currency.
+
+**European security crisis.** A major military escalation in Europe, as after Russia's full-scale invasion of Ukraine. Largest projected volatility rises: USA +18%, AUS +16%, GBR +16%. Portfolio 1-month 95% VaR rises from 7.8% to 8.7%; holding risk constant means cutting exposure by 10.3%. In the analogue (2022-02-23 to 2022-03-31), the worst-hit market for a Canadian investor was DEU at -7.4%: -3.9% from local equity and -3.7% from currency.
+
+**Emerging-market governance shock.** Sudden leadership or finance-ministry upheaval in large emerging markets, as in Brazil (May 2017) and South Africa (December 2015). The monthly political-risk indices barely registered this episode (largest shock 0.2 s.d.), so the model projects almost no change in volatility. In the analogue (2017-05-17 to 2017-06-16), the worst-hit market for a Canadian investor was BRA at -15.1%: -7.8% from local equity and -7.9% from currency. News-based indices miss domestic governance shocks like these, so they need separate monitoring: the event study, not the index, is the guide here.
+
+**U.S. fiscal standoff.** A U.S. debt-ceiling standoff that ends in a credit-rating downgrade, as in July to August 2011 (a period that also saw the euro-area debt crisis intensify). Largest projected volatility rises: ZAF +10%, BRA +9%, AUS +8%. Portfolio 1-month 95% VaR rises from 7.8% to 8.3%; holding risk constant means cutting exposure by 6.4%. In the analogue (2011-07-22 to 2011-08-22), the worst-hit market for a Canadian investor was DEU at -22.2%: -25.6% from local equity and 4.6% from currency.
+
+
 ## Stress tests (cumulative USD return)
 
 |                                     |   USA |   DEU |   JPN |   GBR |   FRA |   CAN |   AUS |   IND |   BRA |   ZAF |   BENCH |   Equal-weight portfolio |
@@ -53,4 +66,5 @@ Coverage: 10 equity markets, May 2008 to Jul 2026, monthly, 2,124 country-month 
 - Local projections include two lags of the outcome and the shock; Driscoll-Kraay errors allow for cross-country and serial correlation.
 - Panel VAR is identified with political risk ordered first; results may depend on this ordering.
 - Ten markets and roughly two decades of data limit statistical power. Treat estimates as indicative.
+- Scenario shocks are calibrated to historical analogues; projections assume each market's volatility responds only to its own political risk and that correlations do not change.
 - Event dates are the first U.S. trading day on which the news could be priced, taken from public reporting.

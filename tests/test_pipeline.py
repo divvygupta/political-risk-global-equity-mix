@@ -72,3 +72,35 @@ def test_panel_var_shapes(synth):
     var = econometrics.panel_var(synth[5], p=2, horizons=6, n_boot=20)
     assert var["irf"].shape == (7, 3, 3)
     assert (var["lo"] <= var["hi"]).all()
+
+
+# --- Scenarios -------------------------------------------------------------------------
+from political_risk import scenarios  # noqa: E402
+
+
+def test_scenario_shocks_non_negative(synth):
+    shocks = scenarios.scenario_shocks(synth[3])
+    assert (shocks.values >= 0).all()
+    assert shocks.loc["Emerging-market governance shock"].drop(["BRA", "ZAF"]).eq(0).all()
+
+
+def test_cad_decomposition_adds_up(synth):
+    prices = synth[0]
+    fx = data.synthetic_fx(prices.index)
+    a = scenarios.analogue_outcomes(prices, fx)
+    total = np.log1p(a["local equity"]) + np.log1p(a["currency vs CAD"])
+    assert np.allclose(total, np.log1p(a["CAD-investor return"]))
+    can = a[a.country == "CAN"]
+    assert np.allclose(can["currency vs CAD"], 0)
+
+
+def test_zero_shock_leaves_var_unchanged(synth):
+    prices, panel = synth[0], synth[5]
+    fx = data.synthetic_fx(prices.index)
+    var = econometrics.panel_var(panel, p=1, horizons=3, n_boot=5)
+    zero = pd.DataFrame(0.0, index=["none"], columns=prices.columns.drop("BENCH"))
+    _, port = scenarios.portfolio_risk(prices, fx, zero, var)
+    assert port.loc["none", "VaR increase"] == pytest.approx(0, abs=1e-12)
+    big = zero + 3
+    _, port2 = scenarios.portfolio_risk(prices, fx, big.rename(index={"none": "big"}), var)
+    assert port2.loc["big", "VaR increase"] > 0
