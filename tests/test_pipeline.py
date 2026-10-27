@@ -104,3 +104,71 @@ def test_zero_shock_leaves_var_unchanged(synth):
     big = zero + 3
     _, port2 = scenarios.portfolio_risk(prices, fx, big.rename(index={"none": "big"}), var)
     assert port2.loc["big", "VaR increase"] > 0
+
+
+# --- Election surprises, leader exits, risk taxonomy, themes -----------------------------------
+from political_risk import config, surprises  # noqa: E402
+
+
+def _null_market(seed=0, end="2026-10-30"):
+    """Markets with no political effects at all: country = benchmark + independent noise."""
+    rng = np.random.default_rng(seed)
+    days = pd.bdate_range("2008-01-01", end)
+    mkt = rng.normal(0, 0.01, len(days))
+    prices = pd.DataFrame({"BENCH": 100 * np.exp(np.cumsum(mkt))}, index=days)
+    fx = pd.DataFrame(index=days)
+    for c in config.COUNTRIES:
+        prices[c] = 100 * np.exp(np.cumsum(mkt + rng.normal(0, 0.008, len(days))))
+        fx[c] = 1.0 if c == "USA" else np.exp(np.cumsum(rng.normal(0, 0.005, len(days))))
+    return prices, fx
+
+
+def _jump(df, country, date, size):
+    """Permanent log jump of ``size`` in one column from the first trading day on or after ``date``."""
+    pos = df.index.searchsorted(pd.Timestamp(date))
+    df.iloc[pos:, df.columns.get_loc(country)] *= np.exp(size)
+
+
+def test_election_study_recovers_planted_surprise_moves():
+    prices, fx = _null_market(1)
+    for e in config.ELECTIONS:
+        if e.surprise in surprises.SURPRISES:
+            _jump(prices, e.country, e.date, -0.06)
+            if e.country != "USA":
+                _jump(fx, e.country, e.date, 0.04)  # 4% more local currency per dollar = weaker currency
+    per, by_class, tests, _ = surprises.election_study(prices, fx)
+    assert len(per) == len(config.ELECTIONS)
+    up = per[per.surprise.isin(surprises.SURPRISES)]
+    assert up["CAR [0,+1]"].mean() == pytest.approx(-0.06, abs=0.01)
+    assert (up["FX [0,+1]"].dropna() < 0).all()  # a weaker currency shows as a negative move
+    assert by_class.loc["As expected", "mean |equity move|"] < 0.02
+    assert tests.loc["Equity: surprise vs. as expected", "welch p"] < 0.01
+
+
+def test_no_surprise_effect_in_null_market():
+    prices, fx = _null_market(2)
+    _, _, tests, _ = surprises.election_study(prices, fx)
+    assert tests.loc["Equity: surprise vs. as expected", "welch p"] > 0.01
+
+
+def test_taxonomy_counts_each_market_day_once_and_uses_three_classes():
+    prices, fx = _null_market(3)
+    per, summary, (mean, se) = surprises.taxonomy_study(prices, fx)
+    assert not per.duplicated(["country", "date"]).any()
+    assert set(per["risk class"]) <= {surprises.EXPECTED, surprises.SURPRISE, surprises.EXOGENOUS}
+    # Turnbull's ouster and Abe's resignation are both in EVENTS and LEADER_EXITS but count once.
+    for country, date in [("AUS", "2018-08-24"), ("JPN", "2020-08-28")]:
+        assert ((per.country == country) & (per.date == pd.Timestamp(date).date())).sum() == 1
+    assert summary["n"].sum() == len(per)
+    assert (mean.loc[1] > 0).all()  # each event is signed so that its day 0 to +1 move is positive
+
+
+def test_thematic_relative_return_matches_prices():
+    prices, fx = _null_market(4)
+    th = config.THEMES[3]  # Brexit negotiations, GBR
+    out, paths = surprises.thematic_study(prices, fx, themes=[th])
+    rel = np.log(prices["GBR"]) - np.log(prices["BENCH"])
+    a = rel.loc[: pd.Timestamp(th.start) - pd.Timedelta(days=1)].iloc[-1]
+    b = rel.loc[: pd.Timestamp(th.end)].iloc[-1]
+    assert out.loc[0, "relative return"] == pytest.approx(np.expm1(b - a))
+    assert paths[(th.name, "GBR")].iloc[-1] == pytest.approx(out.loc[0, "relative return"])

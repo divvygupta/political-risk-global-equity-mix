@@ -16,7 +16,7 @@
 \maketitle
 
 \begin{abstract}
-\noindent This paper asks how a multi-asset fund should account for political risk across its country equity exposures. I build a monthly Political Risk Index (PRI) for ten markets from the Economic Policy Uncertainty and Geopolitical Risk indices and estimate its effects with panel local projections, a fixed-effects panel VAR, and a market-model event study of 30 political events. The results point to political risk as a volatility risk rather than a return risk. A one-standard-deviation political-risk surprise raises a country's realised volatility by about 2\% relative to other markets in the same month ($p = 0.003$), while its effect on excess returns is small ($-0.26$ pp) and reverses within a quarter. Event type matters. Unscheduled governance shocks, such as finance-minister dismissals and leadership scandals, cost $-4.8\%$ over three days on average ($p = 0.02$), while scheduled elections have no significant effect. A rule that underweights markets with rising political risk adds little (information ratio 0.16). Four forward-looking scenarios, each calibrated to a historical episode, show that tariff escalation or a European security crisis would raise a Canadian-dollar portfolio's one-month value at risk by about 11--12\%. They also show that the U.S. dollar's role as a safe haven depends on the crisis, and that news-based indices miss domestic governance shocks. Political risk is best treated as an input to the risk budget, not to return forecasts.
+\noindent This paper asks how a multi-asset fund should account for political risk across its country equity exposures. I build a monthly Political Risk Index (PRI) for ten markets from the Economic Policy Uncertainty and Geopolitical Risk indices and estimate its effects with panel local projections, a fixed-effects panel VAR, and a market-model event study of 30 political events. The results point to political risk as a volatility risk rather than a return risk. A one-standard-deviation political-risk surprise raises a country's realised volatility by about 2\% relative to other markets in the same month ($p = 0.003$), while its effect on excess returns is small ($-0.26$ pp) and reverses within a quarter. Event type matters. Unscheduled governance shocks, such as finance-minister dismissals and leadership scandals, cost $-4.8\%$ over three days on average ($p = 0.02$), while scheduled elections have no significant effect. A rule that underweights markets with rising political risk adds little (information ratio 0.16). Four forward-looking scenarios, each calibrated to a historical episode, show that tariff escalation or a European security crisis would raise a Canadian-dollar portfolio's one-month value at risk by about 11--12\%. They also show that the U.S. dollar's role as a safe haven depends on the crisis, and that news-based indices miss domestic governance shocks. Across 50 national elections, what moves markets is the polling error, not the election: results that went against the final polls moved stocks by 3.6 times a normal day, against 1.1 times when the polls were right ($p = 0.01$). Resignations of heads of government rarely matter, exogenous shocks leave volatility elevated for longer than scheduled events, and thematic risks build up over months rather than in a single day. Political risk is best treated as an input to the risk budget, not to return forecasts.
 \end{abstract}
 
 \section{Motivation}
@@ -25,7 +25,7 @@ For a total-fund portfolio, political risk shows up in two places: in the long-r
 \section{Data}
 \textbf{Political risk.} The Economic Policy Uncertainty index \citep{bbd2016} measures newspaper coverage of policy-related economic uncertainty. The country Geopolitical Risk index \citep{ci2022} measures coverage of geopolitical tensions involving each country. The two capture different risks: their within-country correlation ranges from $-0.06$ (Japan) to $0.52$ (Germany). South Africa has no EPU series, so its index uses GPR alone.
 
-\textbf{Markets.} Daily total returns, in U.S. dollars, of the iShares country ETFs for the United States, Germany, Japan, the United Kingdom, France, Canada, Australia, India, Brazil and South Africa, plus the MSCI ACWI ETF as the global benchmark. The sample runs from May 2008 (after ACWI's launch) to July 2026. India starts in 2012 with INDA. Dollar returns put markets on a common basis and reflect what an unhedged foreign investor earns.
+\textbf{Markets.} Daily total returns, in U.S. dollars, of the iShares country ETFs for the United States, Germany, Japan, the United Kingdom, France, Canada, Australia, India, Brazil and South Africa, plus the MSCI ACWI ETF as the global benchmark. The sample runs from May 2008 (after ACWI's launch) to July 2026. India starts in 2012 with INDA. Dollar returns put markets on a common basis and reflect what an unhedged foreign investor earns. Exchange rates are Yahoo Finance daily quotes. Yahoo stamps each quote with the start of the London day, so a quote dated $t$ is roughly the New York close of the previous calendar day; quotes are moved to the day they belong to, and Friday quotes stay one day stale rather than use weekend news.
 
 \section{Method}
 \textbf{Index.} Log EPU and log GPR are standardised within each country and combined with first-principal-component weights. With two standardised inputs, this is an equal-weighted average. A real-time version uses expanding-window standardisation, so each month's value uses only data available then; it is used in all portfolio tests. The political-risk \emph{shock} is the standardised innovation from a country-level AR(1) of the index: the part of this month's political risk not predictable from last month's.
@@ -39,6 +39,8 @@ where $y$ is either the cumulative excess return over ACWI from $t$ to $t+h$ or 
 \textbf{Panel VAR.} A fixed-effects VAR in [shock, excess return, log volatility], with lags built within each country so that no observation is lagged across a country boundary. The lag length (2) is chosen by BIC. Impulse responses use a Cholesky ordering with political risk first, and 90\% bands come from 500 country-cluster bootstrap draws. Because it has no month effects, the VAR captures the \emph{total} response, including moves shared across markets.
 
 \textbf{Event study.} For 30 events (three per country), normal returns come from a market model of the country ETF on ACWI, estimated over trading days $[-250,-30]$. Each event is dated to the first U.S. trading day on which the news could be priced. Cumulative abnormal returns (CARs) are tested per event and across events with the standardised cross-sectional test of \citet{bmp1991}.
+
+\textbf{Election surprises and the risk taxonomy.} Each of 50 national elections (2009--2026) is classed against its final polls and seat projections: \emph{Upset} (the poll leader lost), \emph{Big miss} (the leader won, but a majority was won or lost against expectations, or the margin was far off), \emph{As expected}, or \emph{Toss-up}. The surprise classes were checked against contemporary reporting. Reactions use the same market model over days $[0,+1]$, for equities and for the local currency against the U.S. dollar, and each is divided by the market's normal two-day volatility so that markets with different volatility are comparable. Twenty-two resignations and ousters of heads of government are measured the same way. Every dated event is then classed as an \emph{event risk} (a known date: elections, scheduled votes, fiscal statements) or an \emph{exogenous risk} (no warning). Eight \emph{thematic risks} are measured over their full windows: performance against ACWI, the currency, volatility relative to the two prior years, and the share of the move that came in the first month.
 
 \section{Results}
 \subsection{Political risk moves volatility, not returns}
@@ -121,10 +123,10 @@ The results above are backward-looking. To turn them into forward-looking guidan
 \toprule
 Scenario & Current VaR & Scenario VaR & Exposure cut & Largest volatility rises \\
 \midrule
-Tariff escalation          & 7.8\% & 8.7\% & 10.5\% & CAN $+18\%$, JPN $+16\%$ \\
-European security crisis   & 7.8\% & 8.7\% & 10.3\% & USA $+18\%$, AUS, GBR $+16\%$ \\
-U.S. fiscal standoff       & 7.8\% & 8.3\% & 6.4\%  & ZAF $+10\%$, BRA $+9\%$ \\
-EM governance shock        & 7.8\% & 7.8\% & 0.2\%  & not captured by the index \\
+Tariff escalation          & 7.3\% & 8.2\% & 10.5\% & CAN $+18\%$, JPN $+16\%$ \\
+European security crisis   & 7.3\% & 8.1\% & 10.2\% & USA $+18\%$, AUS, GBR $+16\%$ \\
+U.S. fiscal standoff       & 7.3\% & 7.8\% & 6.5\%  & ZAF $+10\%$, BRA $+9\%$ \\
+EM governance shock        & 7.3\% & 7.3\% & 0.2\%  & not captured by the index \\
 \bottomrule
 \end{tabular}
 \caption{Scenario results: one-month 95\% VaR of an equal-weight portfolio for a Canadian-dollar investor, and the cut in exposure needed to keep VaR at its current level.}
@@ -139,8 +141,8 @@ EM governance shock        & 7.8\% & 7.8\% & 0.2\%  & not captured by the index 
 
 The historical analogues show what the model cannot: how losses split between equity and currency for a Canadian investor (Figure~\ref{fig:fx}). Three findings stand out.
 \begin{itemize}
-\item \textbf{The U.S. dollar is not a reliable hedge.} In the 2011 standoff, a crisis that started in the U.S., the U.S. dollar still rose about 5\% against the Canadian dollar and cushioned losses. In the 2025 tariff episode it fell, so U.S. stocks lost a Canadian investor 11.7\%: 7.4\% from the market and 4.6\% from the currency.
-\item \textbf{Currency can be half the loss.} In the 2022 European crisis, German stocks lost a Canadian investor 7.4\%, about half of it from the euro. In Brazil in 2017, the real accounted for half of a 15.1\% loss.
+\item \textbf{The U.S. dollar is not a reliable hedge.} In the 2011 standoff, a crisis that started in the U.S., the U.S. dollar still rose about 5\% against the Canadian dollar and cushioned losses. In the 2025 tariff episode it fell, so U.S. stocks lost a Canadian investor 11.9\%: 7.4\% from the market and 4.9\% from the currency.
+\item \textbf{Currency can be half the loss.} In the 2022 European crisis, German stocks lost a Canadian investor 7.1\%, about half of it from the euro. In Brazil in 2017, the real accounted for almost half of a 15.0\% loss.
 \item \textbf{The index has a blind spot.} The monthly indices barely registered the Brazilian and South African governance shocks (largest shock 0.2 standard deviations), even though markets fell 14\% and 12\% in three days. Domestic governance risk needs monitoring beyond news-based indices. The event study, not the index, is the guide here.
 \end{itemize}
 
@@ -150,16 +152,62 @@ The historical analogues show what the model cannot: how losses split between eq
 \label{fig:fx}
 \end{figure}
 
+\subsection{Polls, resignations and three kinds of political risk}
+The event study above treats each election as one event. But an election whose result was in the polls for weeks is a different piece of news from one that went against them. Table~\ref{tab:surprise} sorts 50 national elections by how their results compared with the final polls.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{lrrrrr}
+\toprule
+Poll outcome & $n$ & $|$Equity move$|$ & $\times$ normal day & $|$Currency move$|$ & Significant \\
+\midrule
+Upset        & 5  & 5.2\% & 5.6 & 3.7\% & 100\% \\
+Big miss     & 8  & 2.6\% & 2.4 & 1.3\% & 62\% \\
+Toss-up      & 6  & 0.7\% & 1.7 & 0.5\% & 33\% \\
+As expected  & 31 & 1.1\% & 1.1 & 1.0\% & 19\% \\
+\bottomrule
+\end{tabular}
+\caption{Average absolute reaction of each country's equities (against ACWI) and currency (against the U.S. dollar) over days 0 to +1, by how the result compared with the final polls. ``Significant'' is the share of equity moves significant at 5\%. Currency moves exclude the United States.}
+\label{tab:surprise}
+\end{table}
+
+Results that went against the polls moved equities by 3.6 times a normal day's move on average, against 1.1 times for results the polls got right (Welch $p = 0.01$, Mann--Whitney $p < 0.001$). All five upsets moved markets significantly: the Brexit referendum ($-8.7\%$), Trump in 2016, Morrison's win in Australia in 2019, the French legislative run-off in 2024 ($-2.6\%$) and Brazil's 2026 first round ($+10.7\%$). Big misses ranged from India's BJP losing its majority in 2024 ($-3.8\%$) to Japan's 2026 supermajority ($+3.4\%$). Large political changes that the polls had signalled barely moved markets: Japan's ruling coalition losing its majority in 2024 ($+1.2\%$) and South Africa's ANC losing its majority ($+0.3\%$). Currencies also moved more after surprises (4.6 against 1.2 times a normal day for upsets and expected results), but with few currency observations the difference is not significant.
+
+Resignations and ousters of heads of government matter even less (Figure~\ref{fig:surprise}, panel c). Only 3 of 22 moved their market significantly: Suga's decision not to run in 2021 ($+3.8\%$), Starmer's resignation in 2026 ($+2.0\%$) and Lecornu's resignation in 2025 ($-2.4\%$). The UK's five prime-ministerial exits since 2010 moved UK equities by between $-0.8\%$ and $+2.0\%$ against ACWI. By the time a leader goes, the crisis is usually already priced.
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig10_election_surprises.png}
+\caption{Absolute equity and currency reactions to 50 elections by poll outcome (a, b), and signed equity reactions to 22 leader exits (c), in multiples of the market's normal two-day move.}
+\label{fig:surprise}
+\end{figure}
+
+Grouping every dated event by whether its date was known gives a simple taxonomy (Figure~\ref{fig:taxonomy}). \emph{Event risks} with an expected outcome ($n = 41$) average 1.2 times a normal day, and only 20\% are significant. Event risks with a surprise outcome ($n = 14$) average 3.7 times, 79\% are significant, and about 45\% of the typical move reverses within ten days. \emph{Exogenous risks} ($n = 31$) are smaller on impact (1.4 times) but different in kind: they lose 1.0\% on average, the first move tends to keep going, and abnormal-return volatility stays 1.4 times normal for the following ten days, against 1.1 after an expected event.
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig11_risk_taxonomy.png}
+\caption{Event risks with expected and surprise outcomes against exogenous risks: average signed path (a), size of the first move (b), and volatility before and after (c).}
+\label{fig:taxonomy}
+\end{figure}
+
+\emph{Thematic risks} do not show up as one large day at all (Figure~\ref{fig:themes}). French equities lagged ACWI by 26\% from the June 2024 dissolution to October 2026, UK equities by 23\% between the referendum and Brexit, and Brazilian equities by 20\% in the 2014--16 political and fiscal crisis, with the real down a further 23\%. For the nine moves larger than 10\%, no more than 31\% had happened after the first month, and in five the market first moved the other way. Not every theme was a loss: South African equities beat ACWI by 19\% through the ``state capture'' years, once the initial shock was priced and the leadership change came into view.
+
+\begin{figure}[h]
+\centering\includegraphics[width=\textwidth]{fig12_thematic_risks.png}
+\caption{Thematic risks: performance against ACWI and currency over each theme (a), and how the five largest moves built up (b).}
+\label{fig:themes}
+\end{figure}
+
 \section{Implications for a total-fund portfolio}
 \begin{enumerate}
 \item \textbf{Use political risk for sizing, not forecasting.} The robust effect is a short-lived rise in volatility. That is relevant to position sizing, risk limits and the timing of option hedges, but not to return forecasts.
-\item \textbf{Watch governance instability more than elections.} Markets price scheduled elections in advance. The large losses come from unscheduled shocks to who governs or who runs economic policy, which an election calendar would miss.
+\item \textbf{Watch governance instability, and price the polling error.} Markets price scheduled elections in advance; they move when the polls are wrong. Hedging around an election pays mainly when the polls are close or have a record of missing (referendums, first rounds, seat counts). The large losses otherwise come from unscheduled shocks to who governs or who runs economic policy, which an election calendar would miss.
+\item \textbf{Match the response to the kind of risk.} Exogenous shocks belong in the standing risk budget, with liquidity and limits set in advance, because their effect on volatility lasts. Thematic risks build over months and show up in currencies, so they are a strategic allocation and hedging decision rather than a trading one.
 \item \textbf{Treat currency as part of the exposure.} For a Canadian-dollar investor, the currency can account for half the loss in a political shock, and the U.S. dollar is a safe haven in some crises but not in others. Hedging decisions should be scenario-specific.
 \item \textbf{Pre-agree the risk response.} Tariff escalation or a European security crisis would call for roughly a 10\% cut in exposure to keep value at risk unchanged. Agreeing these responses in advance lets a fund act quickly when a scenario starts to unfold.
 \end{enumerate}
 
 \section{Limitations}
-Ten markets and 18 years limit statistical power, and some event types have only two or three events. The panel VAR relies on its ordering assumption, which the local projections avoid. EPU and GPR are text-based measures and pick up media attention as well as underlying risk. The event list was chosen by the author and may favour well-known, and therefore larger, episodes. The backtest excludes transaction costs. The scenarios assume each market responds only to its own political risk and that correlations stay fixed, so they understate risk in a crisis.
+Ten markets and 18 years limit statistical power, and some event types have only two or three events. The panel VAR relies on its ordering assumption, which the local projections avoid. EPU and GPR are text-based measures and pick up media attention as well as underlying risk. The event list was chosen by the author and may favour well-known, and therefore larger, episodes. The election surprise classes are judgements from final polls, and there are only five upsets and eight big misses. Theme windows are set by hand and other news moved markets in the same windows. Currency reactions to weekend elections span three trading days because Friday quotes are stale. The backtest excludes transaction costs. The scenarios assume each market responds only to its own political risk and that correlations stay fixed, so they understate risk in a crisis.
 
 \section*{Reproducibility}
 All code, data sources and tests are in the \href{https://github.com/divvygupta/political-risk-global-equity-mix}{project repository on GitHub}. Results in this paper are from the October 2026 run; a GitHub Actions workflow refreshes them monthly.
