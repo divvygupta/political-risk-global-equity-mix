@@ -177,32 +177,51 @@ def plot_stress(stress: pd.DataFrame, out: str) -> str:
 
 
 def plot_scenarios(vols: pd.DataFrame, port: pd.DataFrame, out: str) -> str:
-    """Projected volatility rise by market for each scenario, and the portfolio's value at risk."""
-    piv = vols.pivot(index="country", columns="scenario", values="vol change")[list(port.index)] * 100
-    piv = piv.loc[piv.max(axis=1).sort_values().index]
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(8, 3.4), gridspec_kw={"width_ratios": [1.3, 1]})
-    y = np.arange(len(piv))
-    for col, c, mk in zip(piv.columns, [BLUE, VERMILLION, GREEN, PURPLE], ["o", "s", "^", "D"]):
-        a1.scatter(piv[col], y, color=c, marker=mk, s=18, label=col, zorder=3)
-    a1.set_yticks(y, piv.index)
-    _zero(a1, "x")
-    a1.set_xlabel("Per cent")
-    a1.set_title("(a) Projected rise in volatility, first month")
-    a1.legend(loc="upper center", bbox_to_anchor=(0.5, -0.17), ncol=2, fontsize=7, handletextpad=0.3)
+    """How much each market's volatility would rise in each scenario, and what that does to portfolio risk."""
+    from matplotlib.colors import LinearSegmentedColormap
+
+    short = {"Tariff escalation": "Tariff\nescalation", "European security crisis": "European\nsecurity crisis",
+             "U.S. fiscal standoff": "U.S. fiscal\nstandoff", "Emerging-market governance shock": "EM governance\nshock*"}
+    order = [s_ for s_ in short if s_ in set(vols["scenario"])]
+    piv = vols.pivot(index="country", columns="scenario", values="vol change")[order] * 100
+    cur = vols.drop_duplicates("country").set_index("country")["current vol"] * 100
+    piv = piv.loc[piv.mean(axis=1).sort_values(ascending=False).index]
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 4.1), gridspec_kw={"width_ratios": [1.25, 1]})
+    cmap = LinearSegmentedColormap.from_list("w2v", ["#ffffff", "#f6c9a8", VERMILLION])
+    a1.imshow(piv.values, cmap=cmap, vmin=0, vmax=max(piv.values.max(), 1), aspect="auto")
+    for i, c in enumerate(piv.index):
+        for j, sc in enumerate(piv.columns):
+            v = piv.loc[c, sc]
+            a1.text(j, i, f"+{v:.0f}%", ha="center", va="center", fontsize=7.5,
+                    color="white" if v > piv.values.max() * 0.7 else BLACK)
+    a1.set_xticks(range(len(order)), [short[o] for o in order], fontsize=7)
+    a1.set_yticks(range(len(piv)), [f"{c} (now {cur[c]:.0f}%)" for c in piv.index], fontsize=7.5)
+    a1.tick_params(top=False, right=False, length=0)
+    a1.set_title("(a) Rise in each market's volatility, first month")
+    for sp in a1.spines.values():
+        sp.set_visible(False)
     yy = np.arange(len(port))
+    names = [short.get(s_, s_).replace("\n", " ").replace("*", "") for s_ in port.index]
+    base = port["current 1-month VaR (95%)"].iloc[0] * 100
     a2.barh(yy, port["scenario 1-month VaR (95%)"] * 100, height=0.55, color=LIGHT, edgecolor=BLACK, lw=0.6)
-    a2.axvline(port["current 1-month VaR (95%)"].iloc[0] * 100, color=BLACK, ls="--", lw=0.8)
-    a2.text(port["current 1-month VaR (95%)"].iloc[0] * 100, -0.5, " Current VaR", fontsize=7, va="bottom")
-    a2.set_yticks(yy, [s.replace(" shock", "").replace("Emerging-market", "EM") for s in port.index], fontsize=7.5)
-    a2.set_ylim(len(port) - 0.5, -0.75)
-    lo = port["current 1-month VaR (95%)"].iloc[0] * 100 * 0.85
-    a2.set_xlim(lo, port["scenario 1-month VaR (95%)"].max() * 100 * 1.04)
+    a2.axvline(base, color=BLACK, ls="--", lw=0.8)
+    a2.text(base + 0.03, -0.62, f"Today: {base:.1f}%", fontsize=7, ha="left", va="bottom")
+    for i, (_, r) in enumerate(port.iterrows()):
+        a2.text(r["scenario 1-month VaR (95%)"] * 100 + 0.03, i,
+                f"{r['scenario 1-month VaR (95%)'] * 100:.1f}%  (cut exposure {r['exposure cut to hold VaR'] * 100:.0f}%)",
+                va="center", fontsize=6.8)
+    a2.set_yticks(yy, names, fontsize=7.5)
+    a2.set_ylim(len(port) - 0.5, -0.9)
+    a2.set_xlim(base * 0.9, port["scenario 1-month VaR (95%)"].max() * 100 * 1.22)
     a2.set_xlabel("Per cent of portfolio value")
-    a2.set_title("(b) One-month 95% value at risk")
+    a2.set_title("(b) Portfolio loss not exceeded in 19 months out of 20")
     fig.tight_layout()
     return _save(fig, out, "fig8_scenarios.png",
-                 "Notes: Equal-weight portfolio of 10 markets held by a Canadian-dollar investor; correlations held at their "
-                 "last-year values.\n" + SOURCE)
+                 "Notes: (a) Projected percentage rise in each market's annualised volatility in the scenario's first month; "
+                 "the label shows today's volatility. (b) One-month 95% value at\nrisk of an equal-weight portfolio of the "
+                 "10 markets held by a Canadian-dollar investor, and the cut in exposure that brings it back to today's level. "
+                 "Correlations are held at\nlast year's values, which understates risk in a crisis. *The news-based indices "
+                 "barely registered past emerging-market governance shocks, so the model projects almost no change.\n" + SOURCE)
 
 
 def plot_fx_split(analogues: pd.DataFrame, out: str, n: int = 4) -> str:
