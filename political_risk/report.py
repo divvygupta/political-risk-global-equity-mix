@@ -278,37 +278,61 @@ def _strip(ax, per, col, label=True, label_classes=("Upset", "Big miss"), seed=0
 
 
 def plot_election_surprises(el: pd.DataFrame, exits: pd.DataFrame, out: str) -> str:
-    """Absolute reactions to elections by how far the result was from the polls, and reactions to leader exits."""
-    fig = plt.figure(figsize=(9, 4.9))
-    gs = fig.add_gridspec(1, 3, width_ratios=[1, 1, 1.15], wspace=0.42)
-    a1, a2, a3 = (fig.add_subplot(gs[0, i]) for i in range(3))
-    _strip(a1, el, "|SCAR [0,+1]|")
-    a1.set_ylabel("Absolute move, multiples of a normal day")
-    a1.set_title("(a) Equities vs. ACWI, days 0 to +1")
-    _strip(a2, el, "|FX z [0,+1]|", seed=1)
-    a2.set_title("(b) Currency vs. U.S. dollar, days 0 to +1")
+    """How much stocks move after elections, by how the result compared with the polls, and after leader exits."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 4.3), gridspec_kw={"width_ratios": [1, 1.05]})
+    names = {"Upset": "Poll leader\nlost", "Big miss": "Right winner,\nresult far\nfrom polls",
+             "Toss-up": "Too close\nto call", "As expected": "Polls were\nright"}
+    classes = [c for c in ["Upset", "Big miss", "Toss-up", "As expected"] if c in set(el["surprise"])]
+    rng = np.random.default_rng(0)
+    for i, c in enumerate(classes):
+        d = el.loc[el["surprise"] == c, "|SCAR [0,+1]|"]
+        colr = CLASS_STYLE[c][0]
+        a1.bar(i, d.mean(), width=0.62, color=colr, alpha=0.35, edgecolor=BLACK, lw=0.6)
+        a1.scatter(i + rng.uniform(-0.18, 0.18, len(d)), d, color=colr, edgecolor=BLACK, lw=0.4, s=14, zorder=3)
+    for c, lab in [("Upset", "Brexit"), ("Upset", "Brazil 2026")]:
+        r = el[(el.surprise == c) & (el.event.str.contains("Brexit" if lab == "Brexit" else "Flavio"))]
+        if len(r):
+            i = classes.index(c)
+            a1.annotate(lab, (i, r["|SCAR [0,+1]|"].iloc[0]), xytext=(10, 0), textcoords="offset points", fontsize=7,
+                        va="center")
+    wrong = el.loc[el["surprise"].isin(["Upset", "Big miss"]), "|SCAR [0,+1]|"].mean()
+    right = el.loc[el["surprise"] == "As expected", "|SCAR [0,+1]|"].mean()
+    a1.axhline(1, color=GREY, lw=0.7, ls=(0, (4, 3)))
+    a1.text(0.97, 0.97, f"Average move\nPolls wrong (first two groups): {wrong:.1f}x\nPolls right: {right:.1f}x\n"
+            "Dashed line: a normal day", transform=a1.transAxes, ha="right", va="top", fontsize=8, linespacing=1.4)
+    means = el.groupby("surprise")["|SCAR [0,+1]|"].mean()
+    a1.set_xticks(range(len(classes)),
+                  [f"{names[c]}\n(n = {(el['surprise'] == c).sum()})\n{means[c]:.1f}x" for c in classes], fontsize=7.3)
+    a1.set_ylabel("Size of the two-day stock move, multiples of a normal day")
+    a1.set_title("(a) Elections: stocks move when the polls are wrong")
+    a1.tick_params(top=False)
     d = exits.sort_values("SCAR [0,+1]").reset_index(drop=True)
     y = np.arange(len(d))
     sig = d["SCAR [0,+1]"].abs() > 1.96
-    for sched, mk in [(False, "o"), (True, "s")]:
-        m = d["scheduled"] == sched
-        a3.scatter(d.loc[m & sig, "SCAR [0,+1]"], y[m & sig], color=BLACK, marker=mk, s=16, zorder=3)
-        a3.scatter(d.loc[m & ~sig, "SCAR [0,+1]"], y[m & ~sig], facecolor="white", edgecolor=BLACK, marker=mk, s=16,
-                   lw=0.7, zorder=3, label="Scheduled vote" if sched else "Resignation or ouster")
-    for v in (-1.96, 1.96):
-        a3.axvline(v, color=GREY, lw=0.6, ls=(0, (4, 3)))
-    _zero(a3, "x")
-    a3.set_yticks(y, [f"{SHORT[r.country]} {str(r.date)[:4]}: {r.event}" for _, r in d.iterrows()], fontsize=5.8)
-    a3.yaxis.tick_right()
-    a3.tick_params(axis="y", left=False, right=False)
-    a3.set_xlabel("Signed move, multiples of a normal day")
-    a3.set_title("(c) Leader exits: equities vs. ACWI")
-    a3.legend(loc="lower right", fontsize=6.5, handletextpad=0.2)
+    uk = d["country"] == "GBR"
+    a2.axvspan(-1.96, 1.96, color=LIGHT, alpha=0.5, lw=0)
+    a2.scatter(d.loc[~uk, "SCAR [0,+1]"], y[~uk], color=GREY, s=14, zorder=3, label="Other countries")
+    a2.scatter(d.loc[uk, "SCAR [0,+1]"], y[uk], color=VERMILLION, marker="D", s=18, zorder=3, label="UK prime ministers")
+    for i, r in d.iterrows():
+        if sig[i] or uk[i]:
+            a2.annotate(f"{r.event.split(' ')[0]} ({SHORT[r.country]} {str(r.date)[:4]})", (r["SCAR [0,+1]"], i),
+                        xytext=(6 if r["SCAR [0,+1]"] >= 0 else -6, 0), textcoords="offset points", fontsize=6.6,
+                        ha="left" if r["SCAR [0,+1]"] >= 0 else "right", va="center")
+    _zero(a2, "x")
+    a2.set_yticks([])
+    a2.set_xlim(-4.2, 5.4)
+    a2.set_ylim(-1.6, len(d))
+    a2.text(0, -1.1, "not significant", ha="center", fontsize=7, color=GREY)
+    a2.set_xlabel("Two-day stock move, multiples of a normal day")
+    a2.set_title(f"(b) Leader exits: {int(sig.sum())} of {len(d)} moved the market")
+    a2.legend(loc="lower right", fontsize=7)
+    a2.tick_params(left=False, right=False, top=False)
+    fig.tight_layout()
     return _save(fig, out, "fig10_election_surprises.png",
-                 "Notes: Upset = the final-poll leader lost; Big miss = the leader won but far from what the polls showed. "
-                 "Moves are market-model abnormal returns (equities)\nand currency changes, divided by the market's normal "
-                 "two-day volatility. Horizontal bars are class means; dashed lines and filled markers in (c) mark 5% "
-                 "significance.\n" + SOURCE)
+                 "Notes: Each country's stocks against MSCI ACWI over the result day and the next (market model), divided by "
+                 "the market's normal two-day move. (a) Bars are group averages,\ndots are single elections. (b) Each dot is "
+                 "a resignation or ouster of a head of government; the shaded band is not statistically significant at 5%.\n"
+                 + SOURCE)
 
 
 def plot_risk_taxonomy(summary: pd.DataFrame, aligned: tuple, out: str) -> str:
