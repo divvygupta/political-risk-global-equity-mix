@@ -33,11 +33,26 @@ def load_prices(start: str = config.START, end: str | None = config.END, refresh
     return prices
 
 
+def _align_fx(fx: pd.DataFrame) -> pd.DataFrame:
+    """Move each Yahoo Finance FX quote to the trading day it belongs to.
+
+    Yahoo's daily FX bars are stamped with the start of the London day, so the value on day t is
+    roughly the New York close of the previous calendar day: the Brexit fall in sterling appears on
+    27 June 2016 in the raw data instead of 24 June. The close of day t is therefore the quote
+    stamped t + 1 calendar day. When there is no such quote (Fridays and days before holidays), the
+    next quote would already include weekend news, so the day keeps its own, one-day-stale quote
+    rather than look ahead. The raw quotes are kept in the cache.
+    """
+    nxt = fx.reindex(fx.index + pd.Timedelta(days=1))
+    nxt.index = fx.index
+    return nxt.fillna(fx)
+
+
 def load_fx(start: str = config.START, end: str | None = config.END, refresh: bool = False) -> pd.DataFrame:
     """Daily exchange rates, local currency per U.S. dollar; columns are country codes (USA = 1)."""
     path = _cache_path("fx.csv")
     if os.path.exists(path) and not refresh:
-        return pd.read_csv(path, index_col=0, parse_dates=True)
+        return _align_fx(pd.read_csv(path, index_col=0, parse_dates=True))
 
     import yfinance as yf
 
@@ -47,7 +62,7 @@ def load_fx(start: str = config.START, end: str | None = config.END, refresh: bo
     fx["USA"] = 1.0
     fx = fx[list(config.COUNTRIES)].dropna(how="all")
     fx.to_csv(path)
-    return fx
+    return _align_fx(fx)
 
 
 # --- Political-risk data ------------------------------------------------------------

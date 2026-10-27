@@ -227,6 +227,146 @@ def plot_fx_split(analogues: pd.DataFrame, out: str, n: int = 4) -> str:
                  + SOURCE)
 
 
+# --- Election surprises, leadership exits and the risk taxonomy ------------------------------
+CLASS_STYLE = {"Upset": (VERMILLION, "D"), "Big miss": (ORANGE, "s"), "Toss-up": (BLUE, "^"), "As expected": (BLACK, "o")}
+SHORT = {"USA": "US", "GBR": "UK", "DEU": "DE", "JPN": "JP", "FRA": "FR", "CAN": "CA", "AUS": "AU", "IND": "IN",
+         "BRA": "BR", "ZAF": "ZA"}
+
+
+def _strip(ax, per, col, label=True, label_classes=("Upset", "Big miss"), seed=0, gap=0.42):
+    rng = np.random.default_rng(seed)
+    classes = [c for c in CLASS_STYLE if c in set(per["surprise"])]
+    for i, c in enumerate(classes):
+        d = per[per["surprise"] == c].dropna(subset=[col])
+        x = i - 0.08 + rng.uniform(-0.12, 0.12, len(d))
+        colr, mk = CLASS_STYLE[c]
+        ax.scatter(x, d[col], color=colr, marker=mk, s=16, lw=0.4, edgecolor=BLACK, zorder=3, alpha=0.9)
+        ax.hlines(d[col].mean(), i - 0.34, i + 0.2, color=BLACK, lw=1.4, zorder=4)
+        if label and c in label_classes:
+            pts = sorted([(r[col], xi, f"{SHORT[r.country]} {str(r.date)[:4]}") for xi, (_, r) in zip(x, d.iterrows())
+                          if r[col] > 1.96])
+            last = -np.inf
+            for yv, xi, txt in pts:
+                ty = max(yv, last + gap)
+                last = ty
+                ax.annotate(txt, (xi, yv), xytext=(i + 0.2, ty), textcoords="data", fontsize=5.8, va="center",
+                            arrowprops=dict(arrowstyle="-", lw=0.4, color=GREY, shrinkA=0, shrinkB=2))
+    ax.axhline(1.96, color=GREY, lw=0.6, ls=(0, (4, 3)))
+    names = {"Upset": "Upset", "Big miss": "Big\nmiss", "Toss-up": "Toss-\nup", "As expected": "As\nexpected"}
+    ax.set_xticks(range(len(classes)),
+                  [f"{names[c]}\n(n = {per.loc[per['surprise'] == c, col].notna().sum()})" for c in classes], fontsize=7)
+    ax.set_xlim(-0.6, len(classes) - 0.2)
+
+
+def plot_election_surprises(el: pd.DataFrame, exits: pd.DataFrame, out: str) -> str:
+    """Absolute reactions to elections by how far the result was from the polls, and reactions to leader exits."""
+    fig = plt.figure(figsize=(9, 4.9))
+    gs = fig.add_gridspec(1, 3, width_ratios=[1, 1, 1.15], wspace=0.42)
+    a1, a2, a3 = (fig.add_subplot(gs[0, i]) for i in range(3))
+    _strip(a1, el, "|SCAR [0,+1]|")
+    a1.set_ylabel("Absolute move, multiples of a normal day")
+    a1.set_title("(a) Equities vs. ACWI, days 0 to +1")
+    _strip(a2, el, "|FX z [0,+1]|", seed=1)
+    a2.set_title("(b) Currency vs. U.S. dollar, days 0 to +1")
+    d = exits.sort_values("SCAR [0,+1]").reset_index(drop=True)
+    y = np.arange(len(d))
+    sig = d["SCAR [0,+1]"].abs() > 1.96
+    for sched, mk in [(False, "o"), (True, "s")]:
+        m = d["scheduled"] == sched
+        a3.scatter(d.loc[m & sig, "SCAR [0,+1]"], y[m & sig], color=BLACK, marker=mk, s=16, zorder=3)
+        a3.scatter(d.loc[m & ~sig, "SCAR [0,+1]"], y[m & ~sig], facecolor="white", edgecolor=BLACK, marker=mk, s=16,
+                   lw=0.7, zorder=3, label="Scheduled vote" if sched else "Resignation or ouster")
+    for v in (-1.96, 1.96):
+        a3.axvline(v, color=GREY, lw=0.6, ls=(0, (4, 3)))
+    _zero(a3, "x")
+    a3.set_yticks(y, [f"{SHORT[r.country]} {str(r.date)[:4]}: {r.event}" for _, r in d.iterrows()], fontsize=5.8)
+    a3.yaxis.tick_right()
+    a3.tick_params(axis="y", left=False, right=False)
+    a3.set_xlabel("Signed move, multiples of a normal day")
+    a3.set_title("(c) Leader exits: equities vs. ACWI")
+    a3.legend(loc="lower right", fontsize=6.5, handletextpad=0.2)
+    return _save(fig, out, "fig10_election_surprises.png",
+                 "Notes: Upset = the final-poll leader lost; Big miss = the leader won but far from what the polls showed. "
+                 "Moves are market-model abnormal returns (equities)\nand currency changes, divided by the market's normal "
+                 "two-day volatility. Horizontal bars are class means; dashed lines and filled markers in (c) mark 5% "
+                 "significance.\n" + SOURCE)
+
+
+def plot_risk_taxonomy(summary: pd.DataFrame, aligned: tuple, out: str) -> str:
+    """Event risks with expected and surprise outcomes vs. exogenous risks: path, size and volatility."""
+    mean, se = aligned
+    styles = {"Event risk: expected outcome": (BLACK, "-", "Event risk, expected outcome"),
+              "Event risk: surprise outcome": (VERMILLION, "--", "Event risk, surprise outcome"),
+              "Exogenous risk": (BLUE, ":", "Exogenous risk")}
+    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(9, 3.1), gridspec_kw={"width_ratios": [1.35, 1, 1]})
+    for c in mean.columns:
+        col, ls, lab = styles[c]
+        a1.fill_between(mean.index, (mean[c] - 1.96 * se[c]) * 100, (mean[c] + 1.96 * se[c]) * 100, color=col,
+                        alpha=0.12, lw=0)
+        a1.plot(mean.index, mean[c] * 100, color=col, ls=ls, label=f"{lab} (n = {int(summary.loc[c, 'n'])})")
+    _zero(a1)
+    a1.axvline(0, color=GREY, lw=0.5)
+    a1.set_xlabel("Trading days relative to news")
+    a1.set_ylabel("Per cent")
+    a1.set_title("(a) Cumulative abnormal return, signed so\n      the first move is up")
+    a1.legend(loc="upper left", fontsize=6.3)
+    x = np.arange(len(summary))
+    labels = [styles[c][2].replace(", ", ",\n").replace("Exogenous risk", "Exogenous\nrisk") for c in summary.index]
+    a2.bar(x, summary["mean |equity move| (x normal day)"], width=0.55, color=[styles[c][0] for c in summary.index],
+           alpha=0.85, edgecolor=BLACK, lw=0.5)
+    for i, (c, r) in enumerate(summary.iterrows()):
+        a2.text(i, r["mean |equity move| (x normal day)"] + 0.08, f"{r['share with significant move'] * 100:.0f}% significant",
+                ha="center", fontsize=6.3)
+    a2.set_ylim(0, summary["mean |equity move| (x normal day)"].max() * 1.18)
+    a2.set_xticks(x, labels, fontsize=6.5)
+    a2.set_ylabel("Multiples of a normal day")
+    a2.set_title("(b) Average absolute move, days 0 to +1")
+    w = 0.32
+    a3.bar(x - w / 2, summary["vol before (x normal)"], width=w, color=LIGHT, edgecolor=BLACK, lw=0.5,
+           label="10 days before")
+    a3.bar(x + w / 2, summary["vol after (x normal)"], width=w, color=GREY, edgecolor=BLACK, lw=0.5,
+           label="10 days after")
+    a3.axhline(1, color=BLACK, lw=0.5, ls=(0, (4, 3)))
+    a3.set_xticks(x, labels, fontsize=6.5)
+    a3.set_ylim(0, max(summary[["vol before (x normal)", "vol after (x normal)"]].max()) * 1.25)
+    a3.set_ylabel("Multiples of normal volatility")
+    a3.set_title("(c) Abnormal-return volatility")
+    a3.legend(loc="upper left", fontsize=6.5)
+    fig.tight_layout()
+    return _save(fig, out, "fig11_risk_taxonomy.png",
+                 "Notes: Event risks have a known date (elections, scheduled votes and fiscal statements); exogenous risks "
+                 "arrive without warning (invasions,\nsackings, resignations, attacks). Market model on ACWI; shading is the "
+                 "95% confidence interval.\n" + SOURCE)
+
+
+def plot_themes(themes: pd.DataFrame, paths: pd.DataFrame, out: str) -> str:
+    """Thematic risks: total relative performance, currency, and how gradually the move built."""
+    d = themes.reset_index(drop=True)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 3.9), gridspec_kw={"width_ratios": [1.1, 1]})
+    y = np.arange(len(d))[::-1]
+    a1.barh(y, d["relative return"] * 100, height=0.6, color=[GREY if v < 0 else LIGHT for v in d["relative return"]],
+            edgecolor=BLACK, lw=0.4, label="Equities vs. ACWI")
+    a1.scatter(d["currency"] * 100, y, color=ORANGE, marker="D", s=12, zorder=3, label="Currency vs. U.S. dollar")
+    _zero(a1, "x")
+    a1.set_yticks(y, [f"{t} ({SHORT[c]})" for t, c in zip(d["theme"], d["country"])], fontsize=6.3)
+    a1.set_xlabel("Per cent over the theme window")
+    a1.set_title("(a) Performance over each theme")
+    a1.legend(loc="upper center", bbox_to_anchor=(0.45, -0.13), ncol=2, fontsize=6.5)
+    picks = d.reindex(d["relative return"].abs().sort_values(ascending=False).index).head(5)
+    for (_, r), col, ls in zip(picks.iterrows(), [BLACK, VERMILLION, BLUE, GREEN, PURPLE], ["-", "--", ":", "-.", "-"]):
+        p = paths[(r.theme, r.country)].dropna() * 100
+        a2.plot(p.index / 21, p.values, color=col, ls=ls, lw=1.0, label=f"{r.theme} ({SHORT[r.country]})")
+    _zero(a2)
+    a2.set_xlabel("Months since the theme began")
+    a2.set_ylabel("Per cent vs. ACWI")
+    a2.set_title("(b) The five largest moves built up over months")
+    a2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2, fontsize=6.2)
+    fig.tight_layout()
+    return _save(fig, out, "fig12_thematic_risks.png",
+                 "Notes: Relative return of each market's U.S.-dollar ETF against ACWI from the close before the theme began; "
+                 "currency is the local currency against the U.S. dollar.\n" + SOURCE)
+
+
 # --- Briefing -------------------------------------------------------------------------------
 def _fmt_pct(x, d=1):
     return "n/a" if pd.isna(x) else f"{x * 100:.{d}f}%"
@@ -333,6 +473,78 @@ def briefing(res: dict, out: str, synthetic: bool) -> str:
             lines += [f"**{s_.name}.** {s_.story} Largest projected volatility rises: {hit_txt}. Portfolio 1-month 95% VaR "
                       f"rises from {_fmt_pct(p_['current 1-month VaR (95%)'])} to {_fmt_pct(p_['scenario 1-month VaR (95%)'])}; "
                       f"holding risk constant means cutting exposure by {_fmt_pct(p_['exposure cut to hold VaR'])}.{w_txt}", ""]
+    sp = res.get("surprises")
+    if sp is not None and len(sp["elections"]):
+        el, bc, tests, ex, tax, th = (sp[k] for k in ["elections", "by_class", "tests", "exits", "taxonomy", "themes"])
+        surp = el[el["surprise"].isin(["Upset", "Big miss"])]
+        exp_ = el[el["surprise"] == "As expected"]
+        te, tc = tests.loc["Equity: surprise vs. as expected"], tests.loc["Currency: surprise vs. as expected"]
+        top = el.reindex(el["|SCAR [0,+1]|"].sort_values(ascending=False).index).head(3)
+        n_sig_up = int((el.loc[el.surprise == "Upset", "|SCAR [0,+1]|"] > 1.96).sum())
+        n_up = int((el.surprise == "Upset").sum())
+        lines += ["", "## Election surprises, leader exits and the risk taxonomy", "",
+                  f"**Polls vs. results.** Across {len(el)} national elections in the 10 markets, each classed against its "
+                  f"final polls, results that went against the polls moved the country's equities (against ACWI, days 0 to +1) "
+                  f"by {surp['|SCAR [0,+1]|'].mean():.1f} times a normal day's move on average, against "
+                  f"{exp_['|SCAR [0,+1]|'].mean():.1f} times for results that matched the polls (Welch p = {te['welch p']:.3f}, "
+                  f"Mann-Whitney p = {te['mann-whitney p']:.3f}). {n_sig_up} of {n_up} upsets moved equities significantly. "
+                  f"Currencies moved more after surprises too ({surp['|FX z [0,+1]|'].mean():.1f} vs. "
+                  f"{exp_['|FX z [0,+1]|'].mean():.1f} times a normal day), but the difference is not statistically "
+                  f"significant (p = {tc['welch p']:.2f}).", "",
+                  "| Poll outcome | Elections | Mean absolute equity move | Times a normal day | Mean absolute currency move | Significant equity moves |",
+                  "|---|---|---|---|---|---|"]
+        for c, r in bc.iterrows():
+            lines.append(f"| {c} | {int(r.n)} | {_fmt_pct(r['mean |equity move|'])} | {r['mean |equity move| (x normal day)']:.1f} | "
+                         f"{_fmt_pct(r['mean |currency move|'])} | {_fmt_pct(r['share with significant equity move'], 0)} |")
+        lines += ["", "Largest election reactions relative to each market's normal volatility: " + "; ".join(
+            f"{r.country} {str(r.date)[:4]} ({r.event}, {r.surprise.lower()}): {_fmt_pct(r['CAR [0,+1]'])}"
+            for _, r in top.iterrows()) + ".",
+            "Even big political changes move markets little when the polls saw them coming, for example "
+            + " and ".join(f"{r.country} {str(r.date)[:4]} ({r.event}, {_fmt_pct(r['CAR [0,+1]'])})"
+                           for _, r in exp_[exp_.event.str.contains("loses")].iterrows()) + ".", ""]
+        sig_ex = ex[ex["|SCAR [0,+1]|"] > 1.96]
+        uk = ex[ex.country == "GBR"]
+        lines += [f"**Leader exits.** Of {len(ex)} departures of a head of government, {len(sig_ex)} moved the country's "
+                  f"equities significantly: " + "; ".join(f"{r.country} {r.event} ({_fmt_pct(r['CAR [0,+1]'])})"
+                                                         for _, r in sig_ex.iterrows()) + ". "
+                  f"The UK's {len(uk)} prime-ministerial exits since 2010 moved UK equities by between "
+                  f"{_fmt_pct(uk['CAR [0,+1]'].min())} and {_fmt_pct(uk['CAR [0,+1]'].max())} against ACWI. A resignation "
+                  "is usually the end of a crisis markets have already priced, not the start of one.", ""]
+        e1, e2, e3 = (tax.loc[k] for k in ["Event risk: expected outcome", "Event risk: surprise outcome", "Exogenous risk"])
+        lines += ["**Event, exogenous and thematic risks.**", "",
+                  f"- *Event risks* (known date, uncertain outcome): when the outcome matched expectations "
+                  f"(n = {int(e1.n)}), the average move was {e1['mean |equity move| (x normal day)']:.1f} times a normal day "
+                  f"and {_fmt_pct(e1['share with significant move'], 0)} were significant. When it did not (n = {int(e2.n)}), "
+                  f"{e2['mean |equity move| (x normal day)']:.1f} times and {_fmt_pct(e2['share with significant move'], 0)}. "
+                  f"About {_fmt_pct(1 - e2['median share of move kept after 10 days'], 0)} of a typical surprise move "
+                  f"reversed within ten days.",
+                  f"- *Exogenous risks* (no warning, n = {int(e3.n)}): {e3['mean |equity move| (x normal day)']:.1f} times "
+                  f"a normal day on average, {_fmt_pct(e3['mean signed equity move'])} in the average direction, and "
+                  f"volatility stayed {e3['vol after (x normal)']:.1f} times normal for the next ten days, against "
+                  f"{e1['vol after (x normal)']:.1f} after an expected event. The first move tended to keep going rather than "
+                  "reverse.",
+                  ]
+        if len(th):
+            neg = th[th["relative return"] < 0]
+            fm = th.loc[th["relative return"].abs() > 0.1, "first-month share"].dropna()
+            lines += [f"- *Thematic risks* (building over months): in {len(neg)} of {len(th)} theme-market pairs the market "
+                      f"lagged ACWI over the theme, by up to {_fmt_pct(-th['relative return'].min(), 0)}. For the {len(fm)} "
+                      f"moves larger than 10%, the first month was a poor guide: no more than {_fmt_pct(fm.max(), 0)} of "
+                      f"the eventual move had happened after one month, and in {int((fm < 0).sum())} cases the market had "
+                      f"first moved the other way. The moves built up gradually, so no single day stands out. Volatility "
+                      f"relative to ACWI was {th['excess vol (x prior)'].median():.2f} times its pre-theme level (median).", "",
+                      "| Theme | Market | Window | Equities vs. ACWI | Currency vs. USD | Volatility vs. before |",
+                      "|---|---|---|---|---|---|"]
+            for _, r in th.iterrows():
+                lines.append(f"| {r.theme} | {r.country} | {r.start} to {r.end} | {_fmt_pct(r['relative return'])} | "
+                             f"{_fmt_pct(r.currency)} | {r['excess vol (x prior)']:.2f}x |")
+        lines += ["", "**What this means for the fund.**", "",
+                  "- Price *the polling error*, not the election. Hedging scheduled events pays only when the polls are "
+                  "close or have a record of missing (referendums, first rounds, parliamentary seat counts).",
+                  "- Exogenous shocks are not predictable from the calendar; they belong in the risk budget (liquidity, "
+                  "limits and standing hedges), and their effect on volatility lasts longer than an election's.",
+                  "- Thematic risks are slow and show up in the political-risk index and in currencies over months: they are "
+                  "a strategic allocation and currency-hedging decision, not a trading one.", ""]
     lines += ["", "## Stress tests (cumulative USD return)", "", (stress * 100).round(1).to_markdown(), "",
               "## Method notes and limitations", "",
               "- PRI uses within-country z-scores; `pri_rt` uses expanding windows so the backtest has no look-ahead.",
@@ -342,7 +554,11 @@ def briefing(res: dict, out: str, synthetic: bool) -> str:
               "- Ten markets and roughly two decades of data limit statistical power. Treat estimates as indicative.",
               "- Scenario shocks are calibrated to historical analogues; projections assume each market's volatility "
               "responds only to its own political risk and that correlations do not change.",
-              "- Event dates are the first U.S. trading day on which the news could be priced, taken from public reporting.", ""]
+              "- Event dates are the first U.S. trading day on which the news could be priced, taken from public reporting.",
+              "- Election surprise classes are judgements based on final polls and seat projections; with 5 upsets and 8 big "
+              "misses, the comparison is indicative. Currencies are not available for the United States.",
+              "- Theme windows are set by hand around well-known episodes, and other news moved markets in the same "
+              "windows, so the thematic results describe what happened rather than isolate cause.", ""]
     path = os.path.join(out, "briefing.md")
     with open(path, "w") as f:
         f.write("\n".join(lines))
