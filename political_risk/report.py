@@ -63,20 +63,26 @@ def plot_pri(pri: pd.DataFrame, out: str, highlight=("USA", "GBR", "CAN")) -> st
 
 
 def plot_lp(lp: pd.DataFrame, out: str) -> str:
-    labels = {"xret": "(a) Cumulative excess return vs. ACWI", "log_rvol": "(b) Log realised volatility"}
-    fig, axes = plt.subplots(1, 2, figsize=(7.5, 2.9))
+    """Response of returns and volatility to a political-risk surprise, in per cent."""
+    labels = {"xret": "(a) Returns vs. global equities: a small dip that fades",
+              "log_rvol": "(b) Volatility: up about 2% at once, back to normal in 2 months"}
+    fig, axes = plt.subplots(1, 2, figsize=(7.5, 3.0))
     for ax, (y, lab) in zip(axes, labels.items()):
         d = lp[lp["outcome"] == y]
-        ax.fill_between(d["h"], d["lo90"], d["hi90"], color=LIGHT, lw=0)
-        ax.plot(d["h"], d["beta"], color=BLACK, marker="o", ms=3)
+        f = (lambda v: v * 100) if y == "xret" else (lambda v: np.expm1(v) * 100)
+        ax.fill_between(d["h"], f(d["lo90"]), f(d["hi90"]), color=LIGHT, lw=0)
+        ax.plot(d["h"], f(d["beta"]), color=BLACK, marker="o", ms=3)
         _zero(ax)
-        ax.set_title(lab)
-        ax.set_xlabel("Months after shock")
+        ax.set_title(lab, fontsize=8.6)
+        ax.set_xlabel("Months after a political-risk surprise")
         ax.set_xticks(range(0, 13, 2))
-    axes[0].set_ylabel("Response to a 1 s.d. shock")
+    axes[0].set_ylabel("Cumulative excess return, per cent")
+    axes[1].set_ylabel("Change in volatility, per cent")
+    fig.tight_layout()
     return _save(fig, out, "fig2_local_projections.png",
-                 "Notes: Panel local projections with country and month fixed effects; shaded area is the 90% confidence "
-                 "interval (Driscoll-Kraay).\n" + SOURCE)
+                 "Notes: Effect of a one-standard-deviation surprise in a country's political-risk index, relative to other "
+                 "markets in the same month (panel local projections with\ncountry and month fixed effects). Shaded area is "
+                 "the 90% confidence interval (Driscoll-Kraay).\n" + SOURCE)
 
 
 def plot_var(var: dict, out: str) -> str:
@@ -237,12 +243,16 @@ def plot_fx_split(analogues: pd.DataFrame, out: str, n: int = 4) -> str:
         ax.scatter(x, np.log1p(d["CAD-investor return"]) * 100, color=BLACK, marker="D", s=10, zorder=3, label="Total")
         _zero(ax)
         ax.set_xticks(x, d["country"])
-        ax.set_title(f"({chr(97 + k)}) {sc.replace(' shock', '')}", fontsize=8)
-    np.atleast_1d(axes)[0].set_ylabel("Log return, per cent")
+        when = {"Tariff escalation": "2025", "European security crisis": "2022",
+                "Emerging-market governance shock": "2015-17", "U.S. fiscal standoff": "2011"}.get(sc, "")
+        ax.set_title(f"({chr(97 + k)}) {sc.replace(' shock', '').replace('Emerging-market', 'EM')}, {when}", fontsize=8)
+    np.atleast_1d(axes)[0].set_ylabel("Return for a Canadian investor, per cent (log)")
     np.atleast_1d(axes)[0].legend(loc="lower left", fontsize=6.5)
     fig.tight_layout()
     return _save(fig, out, "fig9_scenario_analogues.png",
-                 "Notes: Returns over each historical analogue window for a Canadian-dollar investor; four worst-hit markets.\n"
+                 "Notes: Returns over each historical episode for a Canadian-dollar investor, split into the stock market's move "
+                 "(blue) and the currency's move against the Canadian dollar (orange);\nfour worst-hit markets. An orange bar "
+                 "above zero means the currency cushioned the loss.\n"
                  + SOURCE)
 
 
