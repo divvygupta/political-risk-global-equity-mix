@@ -5,7 +5,7 @@ Coverage: 10 equity markets, May 2008 to Jul 2026, monthly, 2,124 country-month 
 ## Key findings
 
 1. **Political risk shows up in volatility, not in returns.** A one-standard-deviation political-risk surprise raises a country's realised volatility by +2.0% in the same month (p = 0.003) and +1.3% the next (p = 0.10), relative to other markets that month. In the panel VAR, which also captures moves shared across markets, volatility rises +5.6% on impact and is significantly above normal in 11 of the following 12 months.
-2. **No lasting return penalty.** The same shock comes with a -0.26 pp excess return versus ACWI in the month (p = 0.05) and a cumulative +0.21 pp after four months (p = 0.43, not statistically significant). Markets reprice risk quickly; they do not keep falling.
+2. **No lasting return penalty.** The same shock comes with a -0.27 pp excess return versus ACWI in the month (p = 0.05) and a cumulative +0.21 pp after four months (p = 0.43, not statistically significant). Markets reprice risk quickly; they do not keep falling.
 3. **No regime effect.** Markets in the top third of political risk returned 0.5% a year versus the bottom third the following month (p = 0.83).
 4. **Event type matters.** Across 30 events the mean 3-day abnormal return was -1.4% (BMP p = 0.16), but this hides a split:
    - Governance (n = 8): -4.8% (BMP p = 0.02)
@@ -27,7 +27,7 @@ Coverage: 10 equity markets, May 2008 to Jul 2026, monthly, 2,124 country-month 
 | Country | PRI (real time) | Tilt-model weight |
 |---|---|---|
 | CAN | +1.56 | 5.0% |
-| USA | +1.49 | 12.1% |
+| USA | +1.50 | 12.1% |
 | DEU | +1.43 | 12.1% |
 | IND | +1.26 | 12.1% |
 | GBR | +0.98 | 12.1% |
@@ -41,13 +41,13 @@ Coverage: 10 equity markets, May 2008 to Jul 2026, monthly, 2,124 country-month 
 
 Each scenario takes its political-risk shocks from a comparable historical episode. The panel VAR turns them into projected volatility; the portfolio is an equal-weight mix of the 10 markets held by a Canadian-dollar investor, with correlations held fixed (which understates risk in a crisis).
 
-**Tariff escalation.** U.S. tariffs on Canada and other trading partners escalate, as in February to April 2025. Largest projected volatility rises: CAN +18%, JPN +16%, USA +14%. Portfolio 1-month 95% VaR rises from 7.3% to 8.2%; holding risk constant means cutting exposure by 10.5%. In the analogue (2025-01-31 to 2025-04-30), the worst-hit market for a Canadian investor was USA at -11.9%: -7.4% from local equity and -4.9% from currency.
+**Tariff escalation.** U.S. tariffs on Canada and other trading partners escalate, as in February to April 2025. Largest projected volatility rises: CAN +18%, JPN +16%, USA +14%. Portfolio 1-month 95% VaR rises from 7.4% to 8.3%; holding risk constant means cutting exposure by 10.5%. In the analogue (2025-01-31 to 2025-04-30), the worst-hit market for a Canadian investor was USA at -11.9%: -7.4% from local equity and -4.9% from currency.
 
-**European security crisis.** A major military escalation in Europe, as after Russia's full-scale invasion of Ukraine. Largest projected volatility rises: USA +18%, AUS +16%, GBR +16%. Portfolio 1-month 95% VaR rises from 7.3% to 8.1%; holding risk constant means cutting exposure by 10.2%. In the analogue (2022-02-23 to 2022-03-31), the worst-hit market for a Canadian investor was DEU at -7.1%: -3.3% from local equity and -3.9% from currency.
+**European security crisis.** A major military escalation in Europe, as after Russia's full-scale invasion of Ukraine. Largest projected volatility rises: USA +18%, AUS +16%, GBR +16%. Portfolio 1-month 95% VaR rises from 7.4% to 8.2%; holding risk constant means cutting exposure by 10.1%. In the analogue (2022-02-23 to 2022-03-31), the worst-hit market for a Canadian investor was DEU at -7.1%: -3.3% from local equity and -3.9% from currency.
 
 **Emerging-market governance shock.** Sudden leadership or finance-ministry upheaval in large emerging markets, as in Brazil (May 2017) and South Africa (December 2015). The monthly political-risk indices barely registered this episode (largest shock 0.2 s.d.), so the model projects almost no change in volatility. In the analogue (2017-05-17 to 2017-06-16), the worst-hit market for a Canadian investor was BRA at -15.0%: -8.9% from local equity and -6.7% from currency. News-based indices miss domestic governance shocks like these, so they need separate monitoring: the event study, not the index, is the guide here.
 
-**U.S. fiscal standoff.** A U.S. debt-ceiling standoff that ends in a credit-rating downgrade, as in July to August 2011 (a period that also saw the euro-area debt crisis intensify). Largest projected volatility rises: ZAF +10%, BRA +9%, AUS +8%. Portfolio 1-month 95% VaR rises from 7.3% to 7.8%; holding risk constant means cutting exposure by 6.5%. In the analogue (2011-07-22 to 2011-08-22), the worst-hit market for a Canadian investor was DEU at -22.2%: -25.6% from local equity and 4.5% from currency.
+**U.S. fiscal standoff.** A U.S. debt-ceiling standoff that ends in a credit-rating downgrade, as in July to August 2011 (a period that also saw the euro-area debt crisis intensify). Largest projected volatility rises: ZAF +10%, BRA +9%, AUS +8%. Portfolio 1-month 95% VaR rises from 7.4% to 7.9%; holding risk constant means cutting exposure by 6.5%. In the analogue (2011-07-22 to 2011-08-22), the worst-hit market for a Canadian investor was DEU at -22.2%: -25.6% from local equity and 4.5% from currency.
 
 
 ## Election surprises, leader exits and the risk taxonomy
@@ -70,7 +70,7 @@ Even big political changes move markets little when the polls saw them coming, f
 
 - *Event risks* (known date, uncertain outcome): when the outcome matched expectations (n = 41), the average move was 1.2 times a normal day and 20% were significant. When it did not (n = 14), 3.7 times and 79%. About 45% of a typical surprise move reversed within ten days.
 - *Exogenous risks* (no warning, n = 31): 1.4 times a normal day on average, -1.0% in the average direction, and volatility stayed 1.4 times normal for the next ten days, against 1.1 after an expected event. The first move tended to keep going rather than reverse.
-- *Thematic risks* (building over months): in 10 of 16 theme-market pairs the market lagged ACWI over the theme, by up to 26%. For the 9 moves larger than 10%, the first month was a poor guide: no more than 31% of the eventual move had happened after one month, and in 5 cases the market had first moved the other way. The moves built up gradually, so no single day stands out. Volatility relative to ACWI was 1.09 times its pre-theme level (median).
+- *Thematic risks* (building over months): in 10 of 16 theme-market pairs the market lagged ACWI over the theme, by up to 23%. For the 9 moves larger than 10%, the first month was a poor guide: no more than 34% of the eventual move had happened after one month, and in 5 cases the market had first moved the other way. The moves built up gradually, so no single day stands out. Volatility relative to ACWI was 1.09 times its pre-theme level (median).
 
 | Theme | Market | Window | Equities vs. ACWI | Currency vs. USD | Volatility vs. before |
 |---|---|---|---|---|---|
@@ -85,7 +85,7 @@ Even big political changes move markets little when the polls saw them coming, f
 | U.S.-China trade war | DEU | 2018-03-22 to 2020-01-15 | -16.4% | -9.7% | 0.97x |
 | European energy and security crisis | DEU | 2022-02-24 to 2023-02-24 | -0.5% | -6.3% | 1.33x |
 | European energy and security crisis | FRA | 2022-02-24 to 2023-02-24 | 10.2% | -6.3% | 1.15x |
-| French political fragmentation | FRA | 2024-06-10 to 2026-10-23 | -25.8% | 2.8% | 1.26x |
+| French political fragmentation | FRA | 2024-06-10 to 2026-11-03 | -23.3% | 2.8% | 1.26x |
 | U.S. tariff regime of 2025 | CAN | 2025-02-03 to 2025-12-31 | 12.0% | 5.8% | 1.12x |
 | U.S. tariff regime of 2025 | USA | 2025-02-03 to 2025-12-31 | -3.3% | -0.0% | 1.07x |
 | U.S. tariff regime of 2025 | DEU | 2025-02-03 to 2025-12-31 | 5.1% | 13.0% | 1.30x |
