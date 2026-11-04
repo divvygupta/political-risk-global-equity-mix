@@ -52,14 +52,14 @@ Each scenario takes its political-risk shocks from a comparable historical episo
 
 ## Election surprises, leader exits and the risk taxonomy
 
-**Polls vs. results.** Across 50 national elections in the 10 markets, each classed against its final polls, results that went against the polls moved the country's equities (against ACWI, days 0 to +1) by 3.6 times a normal day's move on average, against 1.1 times for results that matched the polls (Welch p = 0.012, Mann-Whitney p = 0.000). 5 of 5 upsets moved equities significantly. Currencies moved more after surprises too (2.4 vs. 1.2 times a normal day), but the difference is not statistically significant (p = 0.30).
+**Polls vs. results.** Across 53 national elections in the 10 markets, each classed against its final polls, results that went against the polls moved the country's equities (against ACWI, days 0 to +1) by 3.5 times a normal day's move on average, against 1.2 times for results that matched the polls (Welch p = 0.010, Mann-Whitney p = 0.000). 5 of 5 upsets moved equities significantly. Currencies moved more after surprises too (2.4 vs. 1.2 times a normal day), but the difference is not statistically significant (p = 0.30).
 
 | Poll outcome | Elections | Mean absolute equity move | Times a normal day | Mean absolute currency move | Significant equity moves |
 |---|---|---|---|---|---|
 | Upset | 5 | 5.2% | 5.6 | 3.7% | 100% |
-| Big miss | 8 | 2.6% | 2.4 | 1.3% | 62% |
-| Toss-up | 6 | 0.7% | 1.7 | 0.5% | 33% |
-| As expected | 31 | 1.1% | 1.1 | 1.0% | 19% |
+| Big miss | 9 | 2.4% | 2.4 | 1.3% | 67% |
+| Toss-up | 7 | 0.7% | 1.6 | 0.5% | 29% |
+| As expected | 32 | 1.1% | 1.2 | 1.0% | 22% |
 
 Largest election reactions relative to each market's normal volatility: GBR 2016 (Brexit referendum: Leave wins, upset): -8.7%; GBR 2019 (Conservative majority, as expected): 3.9%; BRA 2026 (Flavio Bolsonaro tops first round, upset): 10.7%.
 Even big political changes move markets little when the polls saw them coming, for example JPN 2024 (Ruling coalition loses majority, 1.2%) and ZAF 2024 (ANC loses its majority, 0.3%).
@@ -68,7 +68,7 @@ Even big political changes move markets little when the polls saw them coming, f
 
 **Event, exogenous and thematic risks.**
 
-- *Event risks* (known date, uncertain outcome): when the outcome matched expectations (n = 41), the average move was 1.2 times a normal day and 20% were significant. When it did not (n = 14), 3.7 times and 79%. About 45% of a typical surprise move reversed within ten days.
+- *Event risks* (known date, uncertain outcome): when the outcome matched expectations (n = 43), the average move was 1.2 times a normal day and 21% were significant. When it did not (n = 15), 3.6 times and 80%. About 44% of a typical surprise move reversed within ten days.
 - *Exogenous risks* (no warning, n = 31): 1.4 times a normal day on average, -1.0% in the average direction, and volatility stayed 1.4 times normal for the next ten days, against 1.1 after an expected event. The first move tended to keep going rather than reverse.
 - *Thematic risks* (building over months): in 10 of 16 theme-market pairs the market lagged ACWI over the theme, by up to 23%. For the 9 moves larger than 10%, the first month was a poor guide: no more than 34% of the eventual move had happened after one month, and in 5 cases the market had first moved the other way. The moves built up gradually, so no single day stands out. Volatility relative to ACWI was 1.09 times its pre-theme level (median).
 

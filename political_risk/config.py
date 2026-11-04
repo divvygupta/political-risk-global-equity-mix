@@ -162,6 +162,16 @@ ELECTIONS = [
     Election("USA", "2016-11-09", "Trump defeats Clinton", "Clinton led national and key-state polls", "Upset"),
     Election("USA", "2020-11-04", "Biden defeats Trump", "Biden led by about 7 points; won by about 4.5", "As expected"),
     Election("USA", "2024-11-06", "Trump defeats Harris", "National polls essentially tied", "Toss-up"),
+    # United States midterms (Tuesday vote, result overnight -> Wednesday)
+    Election("USA", "2014-11-05", "Midterms: Republicans take the Senate and grow House majority",
+             "Republicans favoured for the Senate, but Senate polls overstated Democrats by about 4 points",
+             "Big miss", "https://webarchive.library.unt.edu/dentonfracking/20141114000743/http://fivethirtyeight.com/features/the-polls-were-skewed-toward-democrats"),
+    Election("USA", "2018-11-07", "Midterms: Democrats win the House, Republicans hold the Senate",
+             "Democrats favoured for the House (86%), Republicans for the Senate (82%)",
+             "As expected", "https://fivethirtyeight.com/features/our-final-forecast-in-the-senate-house-and-gubernatorial-races"),
+    Election("USA", "2022-11-09", "Midterms: Republicans win the House narrowly, Democrats hold the Senate",
+             "Senate close to even (Democrats 41-50% to hold); House popular vote within the projected R+2.4 to R+4.0",
+             "Toss-up", "https://fivethirtyeight.com/features/how-our-2022-midterm-forecasts-performed"),
     # United Kingdom (Thursday vote -> Friday)
     Election("GBR", "2010-05-07", "Hung parliament", "Conservatives ahead, short of a majority", "As expected"),
     Election("GBR", "2015-05-08", "Conservative majority", "Conservatives and Labour level; hung parliament expected",
