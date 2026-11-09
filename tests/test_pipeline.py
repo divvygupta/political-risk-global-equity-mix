@@ -110,7 +110,7 @@ def test_zero_shock_leaves_var_unchanged(synth):
 from political_risk import config, surprises  # noqa: E402
 
 
-def _null_market(seed=0, end="2026-10-30"):
+def _null_market(seed=0, end="2026-12-31"):
     """Markets with no political effects at all: country = benchmark + independent noise."""
     rng = np.random.default_rng(seed)
     days = pd.bdate_range("2008-01-01", end)
