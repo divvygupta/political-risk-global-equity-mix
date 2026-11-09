@@ -172,6 +172,9 @@ ELECTIONS = [
     Election("USA", "2022-11-09", "Midterms: Republicans win the House narrowly, Democrats hold the Senate",
              "Senate close to even (Democrats 41-50% to hold); House popular vote within the projected R+2.4 to R+4.0",
              "Toss-up", "https://fivethirtyeight.com/features/how-our-2022-midterm-forecasts-performed"),
+    Election("USA", "2026-11-04", "Midterms: Democrats win the House and the Senate",
+             "Democrats favoured for the House (84%) and the Senate (64%); projected 241 House and 52 Senate seats",
+             "As expected", "https://votes.decisiondeskhq.com/forecast/2026"),
     # United Kingdom (Thursday vote -> Friday)
     Election("GBR", "2010-05-07", "Hung parliament", "Conservatives ahead, short of a majority", "As expected"),
     Election("GBR", "2015-05-08", "Conservative majority", "Conservatives and Labour level; hung parliament expected",
