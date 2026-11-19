@@ -116,5 +116,5 @@ Even big political changes move markets little when the polls saw them coming, f
 - Ten markets and roughly two decades of data limit statistical power. Treat estimates as indicative.
 - Scenario shocks are calibrated to historical analogues; projections assume each market's volatility responds only to its own political risk and that correlations do not change.
 - Event dates are the first U.S. trading day on which the news could be priced, taken from public reporting.
-- Election surprise classes are judgements based on final polls and seat projections; with 5 upsets and 8 big misses, the comparison is indicative. Currencies are not available for the United States.
+- Election surprise classes are judgements based on final polls and seat projections; with 5 upsets and 10 big misses, the comparison is indicative. Currencies are not available for the United States.
 - Theme windows are set by hand around well-known episodes, and other news moved markets in the same windows, so the thematic results describe what happened rather than isolate cause.
